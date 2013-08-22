@@ -1,6 +1,6 @@
 @bkg: rgb(250,250,250);
-@terminalbkg: rgb(220,220,220);
-@terminaltext: rgb(60,60,60);
+@secondary: rgb(180,180,180);
+@text: rgb(60,60,60);
 
 .rounded-corners (@radius: 8px) {
   border-radius: @radius;
@@ -54,4 +54,63 @@ body{
 		background-color: rgb(250,250,250);
 	
 }
+
+p-brick{ 
+  background-color: @secondary;
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+  .noselect;
+}
+
+p-grid{ 
+  background-color: @bkg;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  .noselect;
+}
+
+.grid-col{
+  // background-color: lighten(@secondary, 30%);
+  width: 80px;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  opacity: .7;
+}
+
+p-cell{ 
+  background-color: @secondary;
+  outline: 1px solid @text;
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+  margin: -1px;
+  padding: 0;
+  .noselect;
+  display: inline-block; 
+  opacity: .5;
+}
+
+.active{
+  opacity: 1;
+}
+
+
+
+
+
+
+
+
+
+
 

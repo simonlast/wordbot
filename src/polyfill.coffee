@@ -19,8 +19,7 @@ class Drag
       if not @dragging
         @triggerEvent("p-dragstart", @draggedTarget, e)
         @dragging = true
-      else
-        @triggerEvent("p-dragmove", @draggedTarget, e)
+      @triggerEvent("p-dragmove", @draggedTarget, e)
 
   endDrag: (e) =>
     if @draggedTarget?
@@ -32,6 +31,7 @@ class Drag
     newEvent = $.Event(type)
     newEvent.pageX = e.pageX
     newEvent.pageY = e.pageY
+    newEvent.target = e.target
     $(target).trigger(newEvent)
 
 module.exports = Drag

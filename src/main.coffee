@@ -1,6 +1,10 @@
-Drag = require("./polyfill.coffee")
+require("./components/loadAll.coffee")
+# Drag = require("./polyfill.coffee")
 
 setup = ->
-  drag = new Drag()
+  # drag = new Drag()
+
+  $("body").append("<p-grid></pgrid>")
+
 
 setup()

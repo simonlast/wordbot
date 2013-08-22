@@ -1,0 +1,25 @@
+.noselect {
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+}
+body {
+  background-color: #fafafa;
+  font-family: 'Helvetica Light', 'Helvetica';
+  font-weight: lighter;
+  overflow: hidden;
+  color: #646464;
+  margin: 0;
+}
+#pcanvas {
+  outline: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  /* mobile webkit */
+
+  position: absolute;
+  top: 0;
+  left: 0px;
+  margin: 0;
+  padding: 0;
+  background-color: #fafafa;
+}

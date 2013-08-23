@@ -19,7 +19,37 @@
 
 }).call(this);
 
-},{"./components/loadAll.coffee":2,"./polyfill.coffee":3,"./sound.coffee":4}],3:[function(require,module,exports){
+},{"./components/loadAll.coffee":2,"./sound.coffee":3,"./polyfill.coffee":4}],3:[function(require,module,exports){
+(function() {
+  var sound;
+
+  sound = {};
+
+  sound.load = function() {
+    sound.ready = false;
+    return MIDI.loadPlugin({
+      soundfontUrl: "/midi/soundfont/",
+      instrument: "acoustic_grand_piano",
+      callback: function() {
+        sound.ready = true;
+        return MIDI.setVolume(0, 127);
+      }
+    });
+  };
+
+  sound.play = function(note) {
+    var delay, velocity;
+    delay = 0;
+    velocity = 127;
+    MIDI.noteOn(0, note, velocity, delay);
+    return MIDI.noteOff(0, note, delay + 0.75);
+  };
+
+  module.exports = sound;
+
+}).call(this);
+
+},{}],4:[function(require,module,exports){
 (function() {
   var Drag,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -77,36 +107,6 @@
   })();
 
   module.exports = Drag;
-
-}).call(this);
-
-},{}],4:[function(require,module,exports){
-(function() {
-  var sound;
-
-  sound = {};
-
-  sound.load = function() {
-    sound.ready = false;
-    return MIDI.loadPlugin({
-      soundfontUrl: "/midi/soundfont/",
-      instrument: "acoustic_grand_piano",
-      callback: function() {
-        sound.ready = true;
-        return MIDI.setVolume(0, 127);
-      }
-    });
-  };
-
-  sound.play = function(note) {
-    var delay, velocity;
-    delay = 0;
-    velocity = 127;
-    MIDI.noteOn(0, note, velocity, delay);
-    return MIDI.noteOff(0, note, delay + 0.75);
-  };
-
-  module.exports = sound;
 
 }).call(this);
 
@@ -259,7 +259,30 @@
   };
 
   Cell.initListeners = function() {
-    return this.$el.on("mousedown", this.toggleActive.bind(this));
+    this.$el.on("click", this.toggleActive.bind(this));
+    this.$el.on("p-dragstart", this.startDrag.bind(this));
+    this.$el.on("p-dragmove", this.drag.bind(this));
+    return this.$el.on("p-dragend", this.endDrag.bind(this));
+  };
+
+  Cell.startDrag = function(e) {
+    this.$ghost = this.$el.clone();
+    this.$ghost.css({
+      position: "absolute"
+    });
+    return $('body').append(this.$ghost);
+  };
+
+  Cell.drag = function(e) {
+    this.$ghost.css({
+      top: e.pageY + "px",
+      left: e.pageX + "px"
+    });
+    return console.log("drag");
+  };
+
+  Cell.endDrag = function(e) {
+    return console.log("endDrag");
   };
 
   Cell.toggleActive = function() {
@@ -279,7 +302,7 @@
 
 }).call(this);
 
-},{"../sound.coffee":4}],8:[function(require,module,exports){
+},{"../sound.coffee":3}],8:[function(require,module,exports){
 (function() {
   module.exports = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126];
 

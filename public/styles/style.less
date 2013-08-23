@@ -21,17 +21,17 @@
 }
 
 .rotate(@deg: 180deg){
-    -moz-transform:rotate(@deg);
+  -moz-transform:rotate(@deg);
 	-webkit-transform:rotate(@deg);
 	-o-transform:rotate(@deg);
 	-ms-transform:rotate(@deg);
 }
 
-.ease (@time: .2s) {
-	-webkit-transition: all @time ease-in-out;
-    -moz-transition: all @time ease-in-out;
-    -o-transition: all @time ease-in-out;
-    -ms-transition: all @time ease-in-out;
+.ease (@time: .1s, @what: all) {
+	-webkit-transition: @what @time ease-in-out;
+  -moz-transition: @what @time ease-in-out;
+  -o-transition: @what @time ease-in-out;
+  -ms-transition: @what @time ease-in-out;
 }
 
 body{
@@ -85,22 +85,26 @@ p-grid{
   padding: 0;
   display: inline-block;
   opacity: .7;
+  .ease(.2s)
 }
 
 p-cell{ 
   background-color: @secondary;
-  outline: 1px solid @text;
+  border: 1px solid @text;
   width: 80px;
   height: 80px;
   cursor: pointer;
-  margin: -1px;
+  margin: -2px;
   padding: 0;
   .noselect;
   display: inline-block; 
   opacity: .5;
+  .rounded-corners(8px);
+  .ease(.1s, opacity);
 }
 
 .active{
+  .ease;
   opacity: 1;
 }
 

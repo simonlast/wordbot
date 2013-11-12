@@ -1,3 +1,6 @@
+* {
+  box-sizing: border-box;
+}
 .noselect {
   -moz-user-select: -moz-none;
   -khtml-user-select: none;
@@ -11,79 +14,40 @@ body {
   color: #646464;
   margin: 0;
 }
-#pcanvas {
-  outline: none;
-  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
-  /* mobile webkit */
-
+p-node {
+  background-color: #dcdcdc;
+  width: 240px;
   position: absolute;
-  top: 0;
-  left: 0px;
-  margin: 0;
-  padding: 0;
-  background-color: #fafafa;
-}
-p-brick {
-  background-color: #b4b4b4;
-  width: 100px;
-  height: 100px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  cursor: pointer;
+  cursor: -webkit-grab;
   -moz-user-select: -moz-none;
   -khtml-user-select: none;
   -webkit-user-select: none;
+  padding: 18px;
+  border-radius: 6px;
 }
-p-grid {
-  background-color: #fafafa;
+p-node .node-text {
+  text-align: center;
   width: 100%;
-  height: 100%;
+  font-size: 24px;
+  margin: 0;
+  padding: 4px;
+  background-color: #c8c8c8;
+  color: #fafafa;
+  border: none;
+  outline: none;
+  border-radius: 6px;
+  font-family: Helvetica;
+  font-weight: 100;
+}
+p-node .node-connect {
   position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  padding: 0;
-  -moz-user-select: -moz-none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-}
-.grid-col {
-  width: 80px;
-  margin: 0;
-  padding: 0;
-  display: inline-block;
-  opacity: .7;
-  -webkit-transition: all 0.2s ease-in-out;
-  -moz-transition: all 0.2s ease-in-out;
-  -o-transition: all 0.2s ease-in-out;
-  -ms-transition: all 0.2s ease-in-out;
-}
-p-cell {
-  background-color: #b4b4b4;
-  border: 1px solid #3c3c3c;
-  width: 80px;
-  height: 80px;
+  bottom: -9px;
+  right: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 100%;
+  border: none;
+  outline: none;
+  background-color: #c8c8c8;
   cursor: pointer;
-  margin: -2px;
-  padding: 0;
-  -moz-user-select: -moz-none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  display: inline-block;
-  opacity: .5;
-  border-radius: 8px;
-  -webkit-border-radius: 8px;
-  -moz-border-radius: 8px;
-  -webkit-transition: opacity 0.1s ease-in-out;
-  -moz-transition: opacity 0.1s ease-in-out;
-  -o-transition: opacity 0.1s ease-in-out;
-  -ms-transition: opacity 0.1s ease-in-out;
-}
-.active {
-  -webkit-transition: all 0.1s ease-in-out;
-  -moz-transition: all 0.1s ease-in-out;
-  -o-transition: all 0.1s ease-in-out;
-  -ms-transition: all 0.1s ease-in-out;
-  opacity: 1;
 }

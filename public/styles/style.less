@@ -1,6 +1,10 @@
 @bkg: rgb(250,250,250);
-@secondary: rgb(180,180,180);
+@secondary: rgb(220,220,220);
 @text: rgb(60,60,60);
+
+*{
+  box-sizing: border-box;
+}
 
 .rounded-corners (@radius: 8px) {
   border-radius: @radius;
@@ -43,78 +47,43 @@ body{
 	margin: 0;
 }
 
-#pcanvas{
-		outline: none;
-	  	-webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
-		position:absolute;
-		top:0;
-		left: 0px;
-		margin:0;
-		padding:0;
-		background-color: rgb(250,250,250);
-	
-}
 
-p-brick{ 
+p-node{
   background-color: @secondary;
-  width: 100px;
-  height: 100px;
+  width: 240px;
   position: absolute;
-  top: 0;
-  left: 0;
-  cursor: pointer;
+  cursor: -webkit-grab;
   .noselect;
+  padding: 18px;
+  border-radius: 6px;
 }
 
-p-grid{ 
-  background-color: @bkg;
+p-node .node-text{
+  text-align: center;
   width: 100%;
-  height: 100%;
+  font-size: 24px;
+  margin: 0;
+  padding: 4px;
+  background-color: rgb(200,200,200);
+  color: rgb(250,250,250);
+  border: none;
+  outline: none;
+  border-radius: 6px;
+
+  font-family: Helvetica;
+  font-weight: 100;
+}
+
+p-node .node-connect{
   position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  padding: 0;
-  .noselect;
-}
-
-.grid-col{
-  // background-color: lighten(@secondary, 30%);
-  width: 80px;
-  margin: 0;
-  padding: 0;
-  display: inline-block;
-  opacity: .7;
-  .ease(.2s)
-}
-
-p-cell{ 
-  background-color: @secondary;
-  border: 1px solid @text;
-  width: 80px;
-  height: 80px;
+  bottom: -9px;
+  right: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 100%;
+  border: none;
+  outline: none;
+  background-color: rgb(200,200,200);
   cursor: pointer;
-  margin: -2px;
-  padding: 0;
-  .noselect;
-  display: inline-block; 
-  opacity: .5;
-  .rounded-corners(8px);
-  .ease(.1s, opacity);
 }
-
-.active{
-  .ease;
-  opacity: 1;
-}
-
-
-
-
-
-
-
-
-
-
 

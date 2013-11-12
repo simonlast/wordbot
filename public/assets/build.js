@@ -109,6 +109,7 @@
   Node.dragStart_ = function(e) {
     var offset;
     if (e.target === this) {
+      this.parentElement.appendChild(this);
       offset = this.$el.offset();
       return this.startOffset = [e.pageX - offset.left, e.pageY - offset.top];
     }

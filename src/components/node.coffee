@@ -25,8 +25,10 @@ Node.initListeners_ = ->
 
 Node.dragStart_ = (e) ->
   if e.target is this
+    @parentElement.appendChild(this)
     offset = @$el.offset()
     @startOffset = [e.pageX - offset.left, e.pageY - offset.top]
+
 
 Node.dragMove_ = (e) ->
   if @startOffset?

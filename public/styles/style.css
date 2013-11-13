@@ -27,7 +27,7 @@ p-connection-layer {
   left: 0;
 }
 p-connection-layer line {
-  stroke: rgba(170, 170, 170, 0.5);
+  stroke: #c8c8c8;
   stroke-width: 12px;
   stroke-linecap: round;
   -webkit-transition: stroke 200ms ease;

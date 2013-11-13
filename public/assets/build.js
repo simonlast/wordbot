@@ -114,12 +114,44 @@
   };
 
   ConnectionLayer.addLine = function(id, from, to) {
+    var sub;
+    this.addLineSimple(id, from, to);
+    from = $V(from);
+    to = $V(to);
+    sub = from.subtract(to);
+    sub = sub.rotate(Math.PI / 2, $V([0, 0]));
+    sub = sub.toUnitVector();
+    sub = sub.multiply(8);
+    this.addLineSimple(id, from.add(sub).elements, to.elements);
+    return this.addLineSimple(id, from.subtract(sub).elements, to.elements);
+  };
+
+  ConnectionLayer.addLineSimple = function(id, from, to) {
     var group, newLine;
     newLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
     newLine.setAttribute("x1", from[0]);
     newLine.setAttribute("x2", to[0]);
     newLine.setAttribute("y1", from[1]);
     newLine.setAttribute("y2", to[1]);
+    group = this.users[id];
+    return group.appendChild(newLine);
+  };
+
+  ConnectionLayer.addLineTriangle = function(id, from, to) {
+    var attrString, group, newLine, points, reduce, sub;
+    newLine = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    from = $V(from);
+    to = $V(to);
+    sub = from.subtract(to);
+    sub = sub.rotate(Math.PI / 2, $V([0, 0]));
+    sub = sub.toUnitVector();
+    sub = sub.multiply(20);
+    points = [from.add(sub), from.subtract(sub), to];
+    reduce = function(result, point) {
+      return result += "" + point.elements[0] + "," + point.elements[1] + " ";
+    };
+    attrString = _.reduce(points, reduce, "");
+    newLine.setAttribute("points", attrString);
     group = this.users[id];
     return group.appendChild(newLine);
   };

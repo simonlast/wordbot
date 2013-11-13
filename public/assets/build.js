@@ -232,9 +232,16 @@
     this.$layerGroup = $(this.layerGroup);
     this.$layerGroup.on("p-dragstart", this.layerGroupDragStart_.bind(this));
     this.$layerGroup.on("p-dragmove", this.layerGroupDragMove_.bind(this));
-    this.$layerGroup.on("p-dragend", this.layerGroupDragEnd_.bind(this));
-    return Node(Dragging);
+    return this.$layerGroup.on("p-dragend", this.layerGroupDragEnd_.bind(this));
   };
+
+  /* ===========================================================================
+  
+    Node Dragging
+  
+  ===========================================================================
+  */
+
 
   Node.dragStart_ = function(e) {
     var offset;
@@ -257,9 +264,16 @@
 
   Node.dragEnd_ = function(e) {
     this.dragStartOffset = null;
-    this.drawAllConnections(this.nodeId);
-    return Connecting;
+    return this.drawAllConnections(this.nodeId);
   };
+
+  /* ===========================================================================
+  
+    Connecting
+  
+  ===========================================================================
+  */
+
 
   Node.connectDragStart_ = function(e) {
     var height, offset, width;
@@ -286,7 +300,13 @@
     }
   };
 
-  layerGroup;
+  /* ===========================================================================
+  
+    layerGroup
+  
+  ===========================================================================
+  */
+
 
   Node.layerGroupDragStart_ = function(e) {
     return console.log(e);
@@ -297,9 +317,16 @@
   };
 
   Node.layerGroupDragMove_ = function(e) {
-    console.log(e);
-    return Helpers;
+    return console.log(e);
   };
+
+  /* ===========================================================================
+  
+    Helpers
+  
+  ===========================================================================
+  */
+
 
   Node.drawConnections = function() {
     var other, _i, _len, _ref, _results;

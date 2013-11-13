@@ -1,6 +1,8 @@
 @bkg: rgb(253,253,253);
 @secondary: rgb(219,230,236);
+@connections: rgb(194,203,206);
 @dark: rgb(164,188,194);
+@text: rgb(40,40,40);
 
 *{
   box-sizing: border-box;
@@ -68,17 +70,35 @@ p-connection-layer{
   left: 0;
 }
 
+p-connection-layer g{
+  opacity: .5;
+}
+
+
 p-connection-layer line{
-  stroke: @dark;
+  stroke: @connections;
   stroke-width: 12px;
   stroke-linecap: round;
   -webkit-transition: stroke 200ms ease;
-  cursor: pointer;
+}
+
+p-connection-layer circle:hover{
+  opacity: 1;
+}
+
+
+p-connection-layer circle{
+  stroke: none;
+  fill: @connections;
+  -webkit-transition: stroke 200ms ease;
+  cursor: -webkit-grab;
+  .ease;
+  opacity: .75;
 }
 
 
 p-node{
-  background-color: @secondary;
+  background-color: @dark;
   width: 240px;
   position: absolute;
   cursor: -webkit-grab;
@@ -93,8 +113,8 @@ p-node .node-text{
   font-size: 24px;
   margin: 0;
   padding: 4px;
-  background-color: @dark;
-  color: rgb(250,250,250);
+  background-color: @secondary;
+  color: @text;
   border: none;
   outline: none;
   border-radius: 6px;
@@ -122,8 +142,8 @@ p-node .node-connect{
   border-radius: 100%;
   border: none;
   outline: none;
-  background-color: @dark;
-  border: 6px solid @secondary;
+  background-color: @secondary;
+  border: 6px solid @dark;
   cursor: pointer;
   .ease;
   .scale(.7);

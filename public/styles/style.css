@@ -26,15 +26,31 @@ p-connection-layer {
   top: 0;
   left: 0;
 }
+p-connection-layer g {
+  opacity: .5;
+}
 p-connection-layer line {
-  stroke: #a4bcc2;
+  stroke: #c2cbce;
   stroke-width: 12px;
   stroke-linecap: round;
   -webkit-transition: stroke 200ms ease;
-  cursor: pointer;
+}
+p-connection-layer circle:hover {
+  opacity: 1;
+}
+p-connection-layer circle {
+  stroke: none;
+  fill: #c2cbce;
+  -webkit-transition: stroke 200ms ease;
+  cursor: -webkit-grab;
+  -webkit-transition: all 100ms ease-in-out;
+  -moz-transition: all 100ms ease-in-out;
+  -o-transition: all 100ms ease-in-out;
+  -ms-transition: all 100ms ease-in-out;
+  opacity: .75;
 }
 p-node {
-  background-color: #dbe6ec;
+  background-color: #a4bcc2;
   width: 240px;
   position: absolute;
   cursor: -webkit-grab;
@@ -50,8 +66,8 @@ p-node .node-text {
   font-size: 24px;
   margin: 0;
   padding: 4px;
-  background-color: #a4bcc2;
-  color: #fafafa;
+  background-color: #dbe6ec;
+  color: #282828;
   border: none;
   outline: none;
   border-radius: 6px;
@@ -82,8 +98,8 @@ p-node .node-connect {
   border-radius: 100%;
   border: none;
   outline: none;
-  background-color: #a4bcc2;
-  border: 6px solid #dbe6ec;
+  background-color: #dbe6ec;
+  border: 6px solid #a4bcc2;
   cursor: pointer;
   -webkit-transition: all 100ms ease-in-out;
   -moz-transition: all 100ms ease-in-out;

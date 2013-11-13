@@ -103,63 +103,86 @@
     var group;
     group = document.createElementNS("http://www.w3.org/2000/svg", "g");
     this.svg.appendChild(group);
-    return this.users[id] = group;
+    this.users[id] = group;
+    return group;
   };
 
   ConnectionLayer.addLineEl = function(id, fromEl, toEl) {
     var fromMiddle, toMiddle;
     fromMiddle = this.getElMiddle(fromEl);
     toMiddle = this.getElMiddle(toEl);
-    return this.addLine(id, fromMiddle, toMiddle);
+    this.addLine(id, fromMiddle, toMiddle);
+    this.addTip(id, fromEl, toEl, fromMiddle, toMiddle);
+    return this.addTip(id, toEl, fromEl, toMiddle, fromMiddle);
+  };
+
+  ConnectionLayer.addTip = function(id, fromEl, toEl, fromMiddle, toMiddle) {
+    var $fromEl, circle, from, fromHeight, fromOffset, fromWidth, group, intersections, lineTo, lines, nearest, to, valid;
+    group = this.users[id];
+    $fromEl = $(fromEl);
+    fromOffset = $fromEl.offset();
+    fromWidth = $fromEl.outerWidth();
+    fromHeight = $fromEl.outerHeight();
+    from = $V(fromMiddle);
+    to = $V(toMiddle);
+    lineTo = $L(from, to.subtract(from));
+    lines = [$L($V([fromOffset.left, fromOffset.top]), $V([0, 1])), $L($V([fromOffset.left, fromOffset.top]), $V([1, 0])), $L($V([fromOffset.left + fromWidth, fromOffset.top]), $V([0, 1])), $L($V([fromOffset.left, fromOffset.top + fromHeight]), $V([1, 0]))];
+    intersections = _.map(lines, function(line) {
+      return line.intersectionWith(lineTo);
+    });
+    valid = _.filter(intersections, function(intersection) {
+      var v;
+      if (intersection == null) {
+        return;
+      }
+      v = intersection.elements;
+      if (v[0] < fromOffset.left || v[0] > fromOffset.left + fromWidth) {
+        return false;
+      }
+      if (v[1] < fromOffset.top || v[1] > fromOffset.top + fromHeight) {
+        return false;
+      }
+      return true;
+    });
+    nearest = _.min(valid, function(intersection) {
+      intersection.elements.splice(2, 1);
+      return intersection.distanceFrom(to);
+    });
+    circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", nearest.elements[0]);
+    circle.setAttribute("cy", nearest.elements[1]);
+    circle.setAttribute("r", 30);
+    return group.appendChild(circle);
   };
 
   ConnectionLayer.addLine = function(id, from, to) {
-    var sub;
-    this.addLineSimple(id, from, to);
+    var group, sub;
+    group = this.users[id];
+    group.appendChild(this.makeLineSimple(from, to));
     from = $V(from);
     to = $V(to);
     sub = from.subtract(to);
     sub = sub.rotate(Math.PI / 2, $V([0, 0]));
     sub = sub.toUnitVector();
     sub = sub.multiply(12);
-    this.addLineSimple(id, from.add(sub).elements, to.elements);
-    return this.addLineSimple(id, from.subtract(sub).elements, to.elements);
-  };
-
-  ConnectionLayer.addLineSimple = function(id, from, to) {
-    var group, newLine;
-    newLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    newLine.setAttribute("x1", from[0]);
-    newLine.setAttribute("x2", to[0]);
-    newLine.setAttribute("y1", from[1]);
-    newLine.setAttribute("y2", to[1]);
-    group = this.users[id];
-    return group.appendChild(newLine);
-  };
-
-  ConnectionLayer.addLineTriangle = function(id, from, to) {
-    var attrString, group, newLine, points, reduce, sub;
-    newLine = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-    from = $V(from);
-    to = $V(to);
-    sub = from.subtract(to);
-    sub = sub.rotate(Math.PI / 2, $V([0, 0]));
-    sub = sub.toUnitVector();
-    sub = sub.multiply(30);
-    points = [from.add(sub), from.subtract(sub), to];
-    reduce = function(result, point) {
-      return result += "" + point.elements[0] + "," + point.elements[1] + " ";
-    };
-    attrString = _.reduce(points, reduce, "");
-    newLine.setAttribute("points", attrString);
-    group = this.users[id];
-    return group.appendChild(newLine);
+    group.appendChild(this.makeLineSimple(from.add(sub).elements, to.elements));
+    return group.appendChild(this.makeLineSimple(from.subtract(sub).elements, to.elements));
   };
 
   ConnectionLayer.clear = function(id) {
     var group;
     group = this.users[id];
     return group.innerHTML = "";
+  };
+
+  ConnectionLayer.makeLineSimple = function(from, to) {
+    var newLine;
+    newLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    newLine.setAttribute("x1", from[0]);
+    newLine.setAttribute("x2", to[0]);
+    newLine.setAttribute("y1", from[1]);
+    newLine.setAttribute("y2", to[1]);
+    return newLine;
   };
 
   ConnectionLayer.getElMiddle = function(el) {
@@ -190,7 +213,7 @@
     this.innerHTML = html;
     this.connectionLayer = document.querySelector("p-connection-layer");
     this.nodeId = this.getAttribute("node-id");
-    this.connectionLayer.registerUser(this.nodeId);
+    this.layerGroup = this.connectionLayer.registerUser(this.nodeId);
     this.connectedTo = [];
     return this.initListeners_();
   };
@@ -202,7 +225,11 @@
     this.$connect = this.$el.children(".node-connect");
     this.$connect.on("p-dragstart", this.connectDragStart_.bind(this));
     this.$connect.on("p-dragmove", this.connectDragMove_.bind(this));
-    return this.$connect.on("p-dragend", this.connectDragEnd_.bind(this));
+    this.$connect.on("p-dragend", this.connectDragEnd_.bind(this));
+    this.$layerGroup = $(this.layerGroup);
+    this.$layerGroup.on("p-dragstart", "circle", this.layerGroupDragStart_.bind(this));
+    this.$layerGroup.on("p-dragmove", "circle", this.layerGroupDragMove_.bind(this));
+    return this.$layerGroup.on("p-dragend", "circle", this.layerGroupDragEnd_.bind(this));
   };
 
   Node.dragStart_ = function(e) {
@@ -252,6 +279,18 @@
       this.connectTo($other[0]);
       return this.drawConnections(this.nodeId);
     }
+  };
+
+  Node.layerGroupDragStart_ = function(e) {
+    return console.log(e);
+  };
+
+  Node.layerGroupDragEnd_ = function(e) {
+    return console.log(e);
+  };
+
+  Node.layerGroupDragMove_ = function(e) {
+    return console.log(e);
   };
 
   Node.drawConnections = function() {

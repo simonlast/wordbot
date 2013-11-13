@@ -7,12 +7,31 @@
   -webkit-user-select: none;
 }
 body {
-  background-color: #fafafa;
+  background-color: #fcfcfc;
   font-family: 'Helvetica Light', 'Helvetica';
   font-weight: lighter;
   overflow: hidden;
   color: #646464;
   margin: 0;
+}
+.node-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+p-connection-layer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+p-connection-layer line {
+  stroke: rgba(170, 170, 170, 0.5);
+  stroke-width: 12px;
+  stroke-linecap: round;
+  -webkit-transition: stroke 200ms ease;
+  cursor: pointer;
 }
 p-node {
   background-color: #dcdcdc;
@@ -31,7 +50,7 @@ p-node .node-text {
   font-size: 24px;
   margin: 0;
   padding: 4px;
-  background-color: #c8c8c8;
+  background-color: rgba(170, 170, 170, 0.5);
   color: #fafafa;
   border: none;
   outline: none;
@@ -48,6 +67,6 @@ p-node .node-connect {
   border-radius: 100%;
   border: none;
   outline: none;
-  background-color: #c8c8c8;
+  background-color: rgba(170, 170, 170, 0.5);
   cursor: pointer;
 }

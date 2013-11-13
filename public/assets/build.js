@@ -78,11 +78,74 @@
 
 },{}],2:[function(require,module,exports){
 (function() {
-  require("./node.coffee");
+  require("./ConnectionLayer.coffee");
+
+  require("./Node.coffee");
 
 }).call(this);
 
-},{"./node.coffee":4}],4:[function(require,module,exports){
+},{"./ConnectionLayer.coffee":4,"./Node.coffee":5}],4:[function(require,module,exports){
+(function() {
+  var ConnectionLayer, html;
+
+  ConnectionLayer = Object.create(HTMLElement.prototype);
+
+  html = "<svg></svg>";
+
+  ConnectionLayer.insertedCallback = function() {
+    this.$el = $(this);
+    this.innerHTML = html;
+    this.svg = this.querySelector("svg");
+    return this.users = {};
+  };
+
+  ConnectionLayer.registerUser = function(id) {
+    var group;
+    group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    this.svg.appendChild(group);
+    return this.users[id] = group;
+  };
+
+  ConnectionLayer.addLineEl = function(id, fromEl, toEl) {
+    var fromMiddle, toMiddle;
+    fromMiddle = this.getElMiddle(fromEl);
+    toMiddle = this.getElMiddle(toEl);
+    return this.addLine(id, fromMiddle, toMiddle);
+  };
+
+  ConnectionLayer.addLine = function(id, from, to) {
+    var group, newLine;
+    newLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    newLine.setAttribute("x1", from[0]);
+    newLine.setAttribute("x2", to[0]);
+    newLine.setAttribute("y1", from[1]);
+    newLine.setAttribute("y2", to[1]);
+    group = this.users[id];
+    return group.appendChild(newLine);
+  };
+
+  ConnectionLayer.clear = function(id) {
+    var group;
+    group = this.users[id];
+    return group.innerHTML = "";
+  };
+
+  ConnectionLayer.getElMiddle = function(el) {
+    var $el, height, offset, width;
+    $el = $(el);
+    offset = $el.offset();
+    width = $el.width();
+    height = $el.height();
+    return [offset.left + width / 2, offset.top + height / 2];
+  };
+
+  document.register("p-connection-layer", {
+    prototype: ConnectionLayer
+  });
+
+}).call(this);
+
+},{}],5:[function(require,module,exports){
 (function() {
   var Node, html;
 
@@ -93,6 +156,10 @@
   Node.insertedCallback = function() {
     this.$el = $(this);
     this.innerHTML = html;
+    this.connectionLayer = document.querySelector("p-connection-layer");
+    this.nodeId = this.getAttribute("node-id");
+    this.connectionLayer.registerUser(this.nodeId);
+    this.connectedTo = [];
     return this.initListeners_();
   };
 
@@ -111,33 +178,75 @@
     if (e.target === this) {
       this.parentElement.appendChild(this);
       offset = this.$el.offset();
-      return this.startOffset = [e.pageX - offset.left, e.pageY - offset.top];
+      return this.dragStartOffset = [e.pageX - offset.left, e.pageY - offset.top];
     }
   };
 
   Node.dragMove_ = function(e) {
-    if (this.startOffset != null) {
-      return this.$el.css({
-        left: (e.pageX - this.startOffset[0]) + "px",
-        top: (e.pageY - this.startOffset[1]) + "px"
+    if (this.dragStartOffset != null) {
+      this.$el.css({
+        left: (e.pageX - this.dragStartOffset[0]) + "px",
+        top: (e.pageY - this.dragStartOffset[1]) + "px"
       });
+      return this.drawAllConnections(this.nodeId);
     }
   };
 
   Node.dragEnd_ = function(e) {
-    return this.startOffset = null;
+    this.dragStartOffset = null;
+    return this.drawAllConnections(this.nodeId);
   };
 
   Node.connectDragStart_ = function(e) {
-    return console.log(e);
+    var height, offset, width;
+    offset = this.$el.offset();
+    width = this.$el.width();
+    height = this.$el.height();
+    return this.connectStart = [offset.left + width / 2, offset.top + height / 2];
   };
 
   Node.connectDragMove_ = function(e) {
-    return console.log(e);
+    if (this.connectStart != null) {
+      this.drawConnections(this.nodeId);
+      return this.connectionLayer.addLine(this.nodeId, this.connectStart, [e.pageX, e.pageY]);
+    }
   };
 
   Node.connectDragEnd_ = function(e) {
-    return console.log(e);
+    var $other;
+    this.connectStart = null;
+    $other = $(e.target).closest("p-node");
+    if (($other.length > 0) && ($other[0] !== this)) {
+      this.connectTo($other[0]);
+      return this.drawConnections(this.nodeId);
+    }
+  };
+
+  Node.drawConnections = function() {
+    var other, _i, _len, _ref, _results;
+    this.connectionLayer.clear(this.nodeId);
+    _ref = this.connectedTo;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      other = _ref[_i];
+      _results.push(this.connectionLayer.addLineEl(this.nodeId, this, other));
+    }
+    return _results;
+  };
+
+  Node.drawAllConnections = function() {
+    var all, node, _i, _len, _results;
+    all = document.querySelectorAll("p-node");
+    _results = [];
+    for (_i = 0, _len = all.length; _i < _len; _i++) {
+      node = all[_i];
+      _results.push(node.drawConnections());
+    }
+    return _results;
+  };
+
+  Node.connectTo = function(other) {
+    return this.connectedTo = _.union(this.connectedTo, [other]);
   };
 
   document.register("p-node", {

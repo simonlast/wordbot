@@ -8,6 +8,13 @@ html = """
 Node.insertedCallback = ->
   @$el = $(this)
   @innerHTML = html
+
+  @connectionLayer = document.querySelector("p-connection-layer")
+  @nodeId = @getAttribute("node-id")
+  @connectionLayer.registerUser(@nodeId)
+
+  @connectedTo = []
+
   @initListeners_()
 
 Node.initListeners_ = ->
@@ -27,31 +34,63 @@ Node.dragStart_ = (e) ->
   if e.target is this
     @parentElement.appendChild(this)
     offset = @$el.offset()
-    @startOffset = [e.pageX - offset.left, e.pageY - offset.top]
+    @dragStartOffset = [e.pageX - offset.left, e.pageY - offset.top]
 
 
 Node.dragMove_ = (e) ->
-  if @startOffset?
+  if @dragStartOffset?
     @$el.css({
-      left: (e.pageX - @startOffset[0]) + "px"
-      top: (e.pageY - @startOffset[1]) + "px"
+      left: (e.pageX - @dragStartOffset[0]) + "px"
+      top: (e.pageY - @dragStartOffset[1]) + "px"
     })
+    @drawAllConnections(@nodeId)
 
 Node.dragEnd_ = (e) ->
-  @startOffset = null
+  @dragStartOffset = null
+  @drawAllConnections(@nodeId)
 
 
 # Connecting
 
 Node.connectDragStart_ = (e) ->
-  console.log e
+  offset = @$el.offset()
+  width = @$el.width()
+  height = @$el.height()
+  @connectStart = [offset.left + width/2, offset.top + height/2]
+
 
 Node.connectDragMove_ = (e) ->
-    console.log e
+    if @connectStart?
+      @drawConnections(@nodeId)
+      @connectionLayer.addLine(@nodeId, @connectStart, [e.pageX, e.pageY])
+
 
 Node.connectDragEnd_ = (e) ->
-    console.log e
+    @connectStart = null
 
+    $other = $(e.target).closest("p-node")
+    if ($other.length > 0) and ($other[0] isnt this)
+      @connectTo($other[0])
+      @drawConnections(@nodeId)
+
+
+# Helpers
+
+Node.drawConnections = ->
+  @connectionLayer.clear(@nodeId)
+  for other in @connectedTo
+    @connectionLayer.addLineEl(@nodeId, this, other)
+
+
+Node.drawAllConnections = ->
+  all = document.querySelectorAll("p-node")
+  for node in all
+    node.drawConnections()
+
+
+
+Node.connectTo = (other) ->
+  @connectedTo = _.union(@connectedTo, [other])
 
 
 document.register("p-node", {

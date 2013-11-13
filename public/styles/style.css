@@ -7,7 +7,7 @@
   -webkit-user-select: none;
 }
 body {
-  background-color: #edf8fd;
+  background-color: #fdfdfd;
   font-family: 'Helvetica Light', 'Helvetica';
   font-weight: lighter;
   overflow: hidden;
@@ -34,7 +34,7 @@ p-connection-layer line {
   cursor: pointer;
 }
 p-node {
-  background-color: #c2cbce;
+  background-color: #dbe6ec;
   width: 240px;
   position: absolute;
   cursor: -webkit-grab;

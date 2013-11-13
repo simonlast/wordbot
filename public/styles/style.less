@@ -70,9 +70,17 @@ p-connection-layer{
   left: 0;
 }
 
+
 p-connection-layer g{
   opacity: .5;
+  cursor: -webkit-grab;
+  .ease;
 }
+
+p-connection-layer g:hover{
+  opacity: .7;
+}
+
 
 
 p-connection-layer line{
@@ -82,18 +90,11 @@ p-connection-layer line{
   -webkit-transition: stroke 200ms ease;
 }
 
-p-connection-layer circle:hover{
-  opacity: 1;
-}
-
 
 p-connection-layer circle{
   stroke: none;
   fill: @connections;
   -webkit-transition: stroke 200ms ease;
-  cursor: -webkit-grab;
-  .ease;
-  opacity: .75;
 }
 
 

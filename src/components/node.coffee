@@ -28,12 +28,18 @@ Node.initListeners_ = ->
   @$connect.on("p-dragend", @connectDragEnd_.bind(this))
 
   @$layerGroup = $(@layerGroup)
-  @$layerGroup.on("p-dragstart", "circle", @layerGroupDragStart_.bind(this))
-  @$layerGroup.on("p-dragmove", "circle", @layerGroupDragMove_.bind(this))
-  @$layerGroup.on("p-dragend", "circle", @layerGroupDragEnd_.bind(this))
+  @$layerGroup.on("p-dragstart", @layerGroupDragStart_.bind(this))
+  @$layerGroup.on("p-dragmove", @layerGroupDragMove_.bind(this))
+  @$layerGroup.on("p-dragend", @layerGroupDragEnd_.bind(this))
 
 
-# Node dragging
+
+################################################################################
+
+  Node Dragging
+
+################################################################################
+
 
 Node.dragStart_ = (e) ->
   if e.target is this
@@ -55,7 +61,13 @@ Node.dragEnd_ = (e) ->
   @drawAllConnections(@nodeId)
 
 
-# Connecting
+
+################################################################################
+
+  Connecting
+
+################################################################################
+
 
 Node.connectDragStart_ = (e) ->
   offset = @$el.offset()
@@ -79,7 +91,13 @@ Node.connectDragEnd_ = (e) ->
       @drawConnections(@nodeId)
 
 
-# Layer group
+
+################################################################################
+
+  layerGroup
+
+################################################################################
+
 
 Node.layerGroupDragStart_ = (e) ->
   console.log e
@@ -94,7 +112,12 @@ Node.layerGroupDragMove_ = (e) ->
 
 
 
-# Helpers
+################################################################################
+
+  Helpers
+
+################################################################################
+
 
 Node.drawConnections = ->
   @connectionLayer.clear(@nodeId)
@@ -106,7 +129,6 @@ Node.drawAllConnections = ->
   all = document.querySelectorAll("p-node")
   for node in all
     node.drawConnections()
-
 
 
 Node.connectTo = (other) ->

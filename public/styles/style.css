@@ -28,6 +28,14 @@ p-connection-layer {
 }
 p-connection-layer g {
   opacity: .5;
+  cursor: -webkit-grab;
+  -webkit-transition: all 100ms ease-in-out;
+  -moz-transition: all 100ms ease-in-out;
+  -o-transition: all 100ms ease-in-out;
+  -ms-transition: all 100ms ease-in-out;
+}
+p-connection-layer g:hover {
+  opacity: .7;
 }
 p-connection-layer line {
   stroke: #c2cbce;
@@ -35,19 +43,10 @@ p-connection-layer line {
   stroke-linecap: round;
   -webkit-transition: stroke 200ms ease;
 }
-p-connection-layer circle:hover {
-  opacity: 1;
-}
 p-connection-layer circle {
   stroke: none;
   fill: #c2cbce;
   -webkit-transition: stroke 200ms ease;
-  cursor: -webkit-grab;
-  -webkit-transition: all 100ms ease-in-out;
-  -moz-transition: all 100ms ease-in-out;
-  -o-transition: all 100ms ease-in-out;
-  -ms-transition: all 100ms ease-in-out;
-  opacity: .75;
 }
 p-node {
   background-color: #a4bcc2;

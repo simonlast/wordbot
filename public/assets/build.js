@@ -156,8 +156,11 @@
   };
 
   ConnectionLayer.addLine = function(id, from, to) {
-    var group, sub;
-    group = this.users[id];
+    var group, idGroup, sub;
+    idGroup = this.users[id];
+    group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    idGroup.appendChild(group);
+    group.classList.add("lineGroup");
     group.appendChild(this.makeLineSimple(from, to));
     from = $V(from);
     to = $V(to);
@@ -227,9 +230,10 @@
     this.$connect.on("p-dragmove", this.connectDragMove_.bind(this));
     this.$connect.on("p-dragend", this.connectDragEnd_.bind(this));
     this.$layerGroup = $(this.layerGroup);
-    this.$layerGroup.on("p-dragstart", "circle", this.layerGroupDragStart_.bind(this));
-    this.$layerGroup.on("p-dragmove", "circle", this.layerGroupDragMove_.bind(this));
-    return this.$layerGroup.on("p-dragend", "circle", this.layerGroupDragEnd_.bind(this));
+    this.$layerGroup.on("p-dragstart", this.layerGroupDragStart_.bind(this));
+    this.$layerGroup.on("p-dragmove", this.layerGroupDragMove_.bind(this));
+    this.$layerGroup.on("p-dragend", this.layerGroupDragEnd_.bind(this));
+    return Node(Dragging);
   };
 
   Node.dragStart_ = function(e) {
@@ -253,7 +257,8 @@
 
   Node.dragEnd_ = function(e) {
     this.dragStartOffset = null;
-    return this.drawAllConnections(this.nodeId);
+    this.drawAllConnections(this.nodeId);
+    return Connecting;
   };
 
   Node.connectDragStart_ = function(e) {
@@ -281,6 +286,8 @@
     }
   };
 
+  layerGroup;
+
   Node.layerGroupDragStart_ = function(e) {
     return console.log(e);
   };
@@ -290,7 +297,8 @@
   };
 
   Node.layerGroupDragMove_ = function(e) {
-    return console.log(e);
+    console.log(e);
+    return Helpers;
   };
 
   Node.drawConnections = function() {

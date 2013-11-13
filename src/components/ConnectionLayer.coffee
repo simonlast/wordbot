@@ -73,7 +73,11 @@ ConnectionLayer.addTip = (id, fromEl, toEl, fromMiddle, toMiddle) ->
 
 
 ConnectionLayer.addLine = (id, from, to) ->
-  group = @users[id]
+  idGroup = @users[id]
+  group = document.createElementNS("http://www.w3.org/2000/svg", "g")
+  idGroup.appendChild(group)
+  group.classList.add("lineGroup")
+
   # One in the middle
   group.appendChild(@makeLineSimple(from, to))
 

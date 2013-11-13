@@ -7,7 +7,7 @@
   -webkit-user-select: none;
 }
 body {
-  background-color: #fcfcfc;
+  background-color: #edf8fd;
   font-family: 'Helvetica Light', 'Helvetica';
   font-weight: lighter;
   overflow: hidden;
@@ -27,14 +27,14 @@ p-connection-layer {
   left: 0;
 }
 p-connection-layer line {
-  stroke: #c8c8c8;
+  stroke: #a4bcc2;
   stroke-width: 12px;
   stroke-linecap: round;
   -webkit-transition: stroke 200ms ease;
   cursor: pointer;
 }
 p-node {
-  background-color: #dcdcdc;
+  background-color: #c2cbce;
   width: 240px;
   position: absolute;
   cursor: -webkit-grab;
@@ -50,7 +50,7 @@ p-node .node-text {
   font-size: 24px;
   margin: 0;
   padding: 4px;
-  background-color: rgba(170, 170, 170, 0.5);
+  background-color: #a4bcc2;
   color: #fafafa;
   border: none;
   outline: none;
@@ -67,6 +67,6 @@ p-node .node-connect {
   border-radius: 100%;
   border: none;
   outline: none;
-  background-color: rgba(170, 170, 170, 0.5);
+  background-color: #a4bcc2;
   cursor: pointer;
 }

@@ -54,8 +54,8 @@ Node.dragEnd_ = (e) ->
 
 Node.connectDragStart_ = (e) ->
   offset = @$el.offset()
-  width = @$el.width()
-  height = @$el.height()
+  width = @$el.outerWidth()
+  height = @$el.outerHeight()
   @connectStart = [offset.left + width/2, offset.top + height/2]
 
 

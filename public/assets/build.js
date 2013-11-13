@@ -121,7 +121,7 @@
     sub = from.subtract(to);
     sub = sub.rotate(Math.PI / 2, $V([0, 0]));
     sub = sub.toUnitVector();
-    sub = sub.multiply(8);
+    sub = sub.multiply(12);
     this.addLineSimple(id, from.add(sub).elements, to.elements);
     return this.addLineSimple(id, from.subtract(sub).elements, to.elements);
   };
@@ -145,7 +145,7 @@
     sub = from.subtract(to);
     sub = sub.rotate(Math.PI / 2, $V([0, 0]));
     sub = sub.toUnitVector();
-    sub = sub.multiply(20);
+    sub = sub.multiply(30);
     points = [from.add(sub), from.subtract(sub), to];
     reduce = function(result, point) {
       return result += "" + point.elements[0] + "," + point.elements[1] + " ";
@@ -166,8 +166,8 @@
     var $el, height, offset, width;
     $el = $(el);
     offset = $el.offset();
-    width = $el.width();
-    height = $el.height();
+    width = $el.outerWidth();
+    height = $el.outerHeight();
     return [offset.left + width / 2, offset.top + height / 2];
   };
 
@@ -232,8 +232,8 @@
   Node.connectDragStart_ = function(e) {
     var height, offset, width;
     offset = this.$el.offset();
-    width = this.$el.width();
-    height = this.$el.height();
+    width = this.$el.outerWidth();
+    height = this.$el.outerHeight();
     return this.connectStart = [offset.left + width / 2, offset.top + height / 2];
   };
 

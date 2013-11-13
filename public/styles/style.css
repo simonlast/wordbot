@@ -58,15 +58,40 @@ p-node .node-text {
   font-family: Helvetica;
   font-weight: 100;
 }
+p-node:hover .node-connect,
+p-node:active .node-connect {
+  -moz-transform: scale(1);
+  -webkit-transform: scale(1);
+  -o-transform: scale(1);
+  -ms-transform: scale(1);
+  opacity: 1;
+}
+.node-connect:hover {
+  -moz-transform: scale(1);
+  -webkit-transform: scale(1);
+  -o-transform: scale(1);
+  -ms-transform: scale(1);
+  opacity: 1;
+}
 p-node .node-connect {
   position: absolute;
-  bottom: -9px;
-  right: -9px;
-  width: 18px;
-  height: 18px;
+  bottom: -8px;
+  right: -8px;
+  width: 32px;
+  height: 32px;
   border-radius: 100%;
   border: none;
   outline: none;
   background-color: #a4bcc2;
+  border: 6px solid #dbe6ec;
   cursor: pointer;
+  -webkit-transition: all 100ms ease-in-out;
+  -moz-transition: all 100ms ease-in-out;
+  -o-transition: all 100ms ease-in-out;
+  -ms-transition: all 100ms ease-in-out;
+  -moz-transform: scale(0.7);
+  -webkit-transform: scale(0.7);
+  -o-transform: scale(0.7);
+  -ms-transform: scale(0.7);
+  opacity: 0;
 }

@@ -31,7 +31,14 @@
 	-ms-transform:rotate(@deg);
 }
 
-.ease (@time: .1s, @what: all) {
+.scale(@scale: 1){
+  -moz-transform:scale(@scale);
+  -webkit-transform:scale(@scale);
+  -o-transform:scale(@scale);
+  -ms-transform:scale(@scale);
+}
+
+.ease (@time: 100ms, @what: all) {
 	-webkit-transition: @what @time ease-in-out;
   -moz-transition: @what @time ease-in-out;
   -o-transition: @what @time ease-in-out;
@@ -96,15 +103,29 @@ p-node .node-text{
   font-weight: 100;
 }
 
+p-node:hover .node-connect, p-node:active .node-connect{
+  .scale(1);
+  opacity: 1;
+}
+
+.node-connect:hover{
+  .scale(1);
+  opacity: 1;
+}
+
 p-node .node-connect{
   position: absolute;
-  bottom: -9px;
-  right: -9px;
-  width: 18px;
-  height: 18px;
+  bottom: -8px;
+  right: -8px;
+  width: 32px;
+  height: 32px;
   border-radius: 100%;
   border: none;
   outline: none;
   background-color: @dark;
+  border: 6px solid @secondary;
   cursor: pointer;
+  .ease;
+  .scale(.7);
+  opacity: 0;
 }

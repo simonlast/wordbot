@@ -34,7 +34,7 @@ ConnectionLayer.addLine = (id, from, to) ->
   sub = from.subtract(to)
   sub = sub.rotate(Math.PI/2, $V([0,0]))
   sub = sub.toUnitVector()
-  sub = sub.multiply(8)
+  sub = sub.multiply(12)
 
   @addLineSimple(id, from.add(sub).elements, to.elements)
   @addLineSimple(id, from.subtract(sub).elements, to.elements)
@@ -59,7 +59,7 @@ ConnectionLayer.addLineTriangle = (id, from, to) ->
   sub = from.subtract(to)
   sub = sub.rotate(Math.PI/2, $V([0,0]))
   sub = sub.toUnitVector()
-  sub = sub.multiply(20)
+  sub = sub.multiply(30)
   points = [from.add(sub), from.subtract(sub), to]
 
   reduce = (result, point) ->
@@ -80,8 +80,8 @@ ConnectionLayer.clear = (id) ->
 ConnectionLayer.getElMiddle = (el) ->
   $el = $(el)
   offset = $el.offset()
-  width = $el.width()
-  height = $el.height()
+  width = $el.outerWidth()
+  height = $el.outerHeight()
   return [offset.left + width/2, offset.top + height/2]
 
 

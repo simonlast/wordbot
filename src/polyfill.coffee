@@ -32,6 +32,7 @@ class Drag
     newEvent.pageX = e.pageX
     newEvent.pageY = e.pageY
     newEvent.target = e.target
+    newEvent.originalEvent = e
     $(target).trigger(newEvent)
 
 module.exports = Drag

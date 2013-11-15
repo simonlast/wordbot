@@ -136,10 +136,8 @@ p-node:hover .node-connect, p-node:active .node-connect{
 
 p-node .node-connect{
   position: absolute;
-  bottom: -8px;
-  right: -8px;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 100%;
   border: none;
   outline: none;
@@ -149,4 +147,28 @@ p-node .node-connect{
   .ease;
   .scale(.7);
   opacity: 0;
+}
+
+p-node .node-connect.left{
+  top: 50%;
+  margin-top: -16px;
+  left: -24px;
+}
+
+p-node .node-connect.top{
+  left: 50%;
+  margin-left: -16px;
+  top: -24px;
+}
+
+p-node .node-connect.right{
+  top: 50%;
+  margin-top: -16px;
+  right: -24px;
+}
+
+p-node .node-connect.bottom{
+  left: 50%;
+  margin-left: -16px;
+  bottom: -24px;
 }

@@ -2,7 +2,10 @@ Node = Object.create(HTMLElement.prototype)
 
 html = """
   <input class="node-text"></input>
-  <button class="node-connect"></button>
+  <button class="node-connect left"></button>
+  <button class="node-connect top"></button>
+  <button class="node-connect right"></button>
+  <button class="node-connect bottom"></button>
 """
 
 Node.insertedCallback = ->
@@ -13,7 +16,12 @@ Node.insertedCallback = ->
   @nodeId = @getAttribute("node-id")
   @layerGroup = @connectionLayer.registerUser(@nodeId)
 
-  @connectedTo = []
+  @connectedTo = {
+    left: null
+    top: null
+    right: null
+    bottom: null
+  }
 
   @initListeners_()
 
@@ -70,25 +78,29 @@ Node.dragEnd_ = (e) ->
 
 
 Node.connectDragStart_ = (e) ->
-  offset = @$el.offset()
-  width = @$el.outerWidth()
-  height = @$el.outerHeight()
+  $target = $(e.target)
+  offset = $target.offset()
+  width = $target.outerWidth()
+  height = $target.outerHeight()
   @connectStart = [offset.left + width/2, offset.top + height/2]
+  @connectStartTarget = e.target
 
 
 Node.connectDragMove_ = (e) ->
-    if @connectStart?
-      @drawConnections(@nodeId)
-      @connectionLayer.addLine(@nodeId, @connectStart, [e.pageX, e.pageY])
+  if @connectStart?
+    @drawConnections(@nodeId)
+    @connectionLayer.addLine(@nodeId, @connectStart, [e.pageX, e.pageY])
 
 
 Node.connectDragEnd_ = (e) ->
-    @connectStart = null
+  $other = $(e.target).closest("p-node")
+  if ($other.length > 0) and ($other[0] isnt this)
+    type = @connectStartTarget.classList[1]
+    @connectTo($other[0], type)
+    @drawConnections(@nodeId)
 
-    $other = $(e.target).closest("p-node")
-    if ($other.length > 0) and ($other[0] isnt this)
-      @connectTo($other[0])
-      @drawConnections(@nodeId)
+  @connectStart = null
+  @connectStartTarget = null
 
 
 
@@ -121,8 +133,10 @@ Node.layerGroupDragMove_ = (e) ->
 
 Node.drawConnections = ->
   @connectionLayer.clear(@nodeId)
-  for other in @connectedTo
-    @connectionLayer.addLineEl(@nodeId, this, other)
+  for type, other of @connectedTo
+    if other?
+      connectNib = @querySelector(".#{type}")
+      @connectionLayer.addLineEl(@nodeId, this, other)
 
 
 Node.drawAllConnections = ->
@@ -131,8 +145,8 @@ Node.drawAllConnections = ->
     node.drawConnections()
 
 
-Node.connectTo = (other) ->
-  @connectedTo = _.union(@connectedTo, [other])
+Node.connectTo = (other, type) ->
+  @connectedTo[type] = other
 
 
 document.register("p-node", {

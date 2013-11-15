@@ -22,8 +22,8 @@ ConnectionLayer.addLineEl = (id, fromEl, toEl) ->
   fromMiddle = @getElMiddle(fromEl)
   toMiddle = @getElMiddle(toEl)
   @addLine(id, fromMiddle, toMiddle)
-  @addTip(id, fromEl, toEl, fromMiddle, toMiddle)
-  @addTip(id, toEl, fromEl, toMiddle, fromMiddle)
+  # @addTip(id, fromEl, toEl, fromMiddle, toMiddle)
+  # @addTip(id, toEl, fromEl, toMiddle, fromMiddle)
 
 
 ConnectionLayer.addTip = (id, fromEl, toEl, fromMiddle, toMiddle) ->

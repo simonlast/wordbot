@@ -65,6 +65,7 @@
       newEvent.pageX = e.pageX;
       newEvent.pageY = e.pageY;
       newEvent.target = e.target;
+      newEvent.originalEvent = e;
       return $(target).trigger(newEvent);
     };
 
@@ -111,9 +112,7 @@
     var fromMiddle, toMiddle;
     fromMiddle = this.getElMiddle(fromEl);
     toMiddle = this.getElMiddle(toEl);
-    this.addLine(id, fromMiddle, toMiddle);
-    this.addTip(id, fromEl, toEl, fromMiddle, toMiddle);
-    return this.addTip(id, toEl, fromEl, toMiddle, fromMiddle);
+    return this.addLine(id, fromMiddle, toMiddle);
   };
 
   ConnectionLayer.addTip = function(id, fromEl, toEl, fromMiddle, toMiddle) {
@@ -209,7 +208,7 @@
 
   Node = Object.create(HTMLElement.prototype);
 
-  html = "<input class=\"node-text\"></input>\n<button class=\"node-connect\"></button>";
+  html = "<input class=\"node-text\"></input>\n<button class=\"node-connect left\"></button>\n<button class=\"node-connect top\"></button>\n<button class=\"node-connect right\"></button>\n<button class=\"node-connect bottom\"></button>";
 
   Node.insertedCallback = function() {
     this.$el = $(this);
@@ -217,7 +216,12 @@
     this.connectionLayer = document.querySelector("p-connection-layer");
     this.nodeId = this.getAttribute("node-id");
     this.layerGroup = this.connectionLayer.registerUser(this.nodeId);
-    this.connectedTo = [];
+    this.connectedTo = {
+      left: null,
+      top: null,
+      right: null,
+      bottom: null
+    };
     return this.initListeners_();
   };
 
@@ -276,11 +280,13 @@
 
 
   Node.connectDragStart_ = function(e) {
-    var height, offset, width;
-    offset = this.$el.offset();
-    width = this.$el.outerWidth();
-    height = this.$el.outerHeight();
-    return this.connectStart = [offset.left + width / 2, offset.top + height / 2];
+    var $target, height, offset, width;
+    $target = $(e.target);
+    offset = $target.offset();
+    width = $target.outerWidth();
+    height = $target.outerHeight();
+    this.connectStart = [offset.left + width / 2, offset.top + height / 2];
+    return this.connectStartTarget = e.target;
   };
 
   Node.connectDragMove_ = function(e) {
@@ -291,13 +297,15 @@
   };
 
   Node.connectDragEnd_ = function(e) {
-    var $other;
-    this.connectStart = null;
+    var $other, type;
     $other = $(e.target).closest("p-node");
     if (($other.length > 0) && ($other[0] !== this)) {
-      this.connectTo($other[0]);
-      return this.drawConnections(this.nodeId);
+      type = this.connectStartTarget.classList[1];
+      this.connectTo($other[0], type);
+      this.drawConnections(this.nodeId);
     }
+    this.connectStart = null;
+    return this.connectStartTarget = null;
   };
 
   /* ===========================================================================
@@ -329,13 +337,18 @@
 
 
   Node.drawConnections = function() {
-    var other, _i, _len, _ref, _results;
+    var connectNib, other, type, _ref, _results;
     this.connectionLayer.clear(this.nodeId);
     _ref = this.connectedTo;
     _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      other = _ref[_i];
-      _results.push(this.connectionLayer.addLineEl(this.nodeId, this, other));
+    for (type in _ref) {
+      other = _ref[type];
+      if (other != null) {
+        connectNib = this.querySelector("." + type);
+        _results.push(this.connectionLayer.addLineEl(this.nodeId, this, other));
+      } else {
+        _results.push(void 0);
+      }
     }
     return _results;
   };
@@ -351,8 +364,8 @@
     return _results;
   };
 
-  Node.connectTo = function(other) {
-    return this.connectedTo = _.union(this.connectedTo, [other]);
+  Node.connectTo = function(other, type) {
+    return this.connectedTo[type] = other;
   };
 
   document.register("p-node", {

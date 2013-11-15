@@ -1,3 +1,5 @@
+util = require("../util.coffee")
+
 ConnectionLayer = Object.create(HTMLElement.prototype)
 
 html = """
@@ -15,20 +17,30 @@ ConnectionLayer.registerUser = (id) ->
   group = document.createElementNS("http://www.w3.org/2000/svg", "g")
   @svg.appendChild(group)
   @users[id] = group
+  group.classList.add("nodeGroup")
   return group
 
 
 ConnectionLayer.addLineEl = (id, fromEl, toEl) ->
-  fromMiddle = @getElMiddle(fromEl)
-  toMiddle = @getElMiddle(toEl)
+  fromMiddle = util.getElMiddle(fromEl)
+  toMiddle = util.getElMiddle(toEl)
   @addLine(id, fromMiddle, toMiddle)
   @addTip(id, fromEl, toEl, fromMiddle, toMiddle)
   @addTip(id, toEl, fromEl, toMiddle, fromMiddle)
 
 
-ConnectionLayer.addTip = (id, fromEl, toEl, fromMiddle, toMiddle) ->
+ConnectionLayer.addNib = (id, x, y) ->
   group = @users[id]
+  circle = document.createElementNS("http://www.w3.org/2000/svg", "circle")
+  circle.setAttribute("cx", x)
+  circle.setAttribute("cy", y)
+  circle.setAttribute("r", 32)
+  circle.classList.add("nib")
+  group.appendChild(circle)
 
+
+
+ConnectionLayer.addTip = (id, fromEl, toEl, fromMiddle, toMiddle) ->
   $fromEl = $(fromEl)
   fromOffset = $fromEl.offset()
   fromWidth = $fromEl.outerWidth()
@@ -65,11 +77,13 @@ ConnectionLayer.addTip = (id, fromEl, toEl, fromMiddle, toMiddle) ->
     intersection.elements.splice(2,1)
     return intersection.distanceFrom(to)
 
-  circle = document.createElementNS("http://www.w3.org/2000/svg", "circle")
-  circle.setAttribute("cx", nearest.elements[0])
-  circle.setAttribute("cy", nearest.elements[1])
-  circle.setAttribute("r", 30)
-  group.appendChild(circle)
+  nib = @addNib(id, nearest.elements[0], nearest.elements[1])
+
+  # Store data as property
+  nib.info = {
+    from: fromEl
+    to: toEl
+  }
 
 
 ConnectionLayer.addLine = (id, from, to) ->
@@ -96,7 +110,7 @@ ConnectionLayer.addLine = (id, from, to) ->
 
 ConnectionLayer.clear = (id) ->
   group = @users[id]
-  group.innerHTML = ""
+  group?.innerHTML = ""
 
 
 ConnectionLayer.makeLineSimple = (from, to) ->
@@ -106,14 +120,6 @@ ConnectionLayer.makeLineSimple = (from, to) ->
   newLine.setAttribute("y1", from[1])
   newLine.setAttribute("y2", to[1])
   return newLine
-
-
-ConnectionLayer.getElMiddle = (el) ->
-  $el = $(el)
-  offset = $el.offset()
-  width = $el.outerWidth()
-  height = $el.outerHeight()
-  return [offset.left + width/2, offset.top + height/2]
 
 
 document.register("p-connection-layer", {

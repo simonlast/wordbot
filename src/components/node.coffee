@@ -1,3 +1,5 @@
+util = require("../util.coffee")
+
 Node = Object.create(HTMLElement.prototype)
 
 html = """
@@ -14,24 +16,19 @@ Node.insertedCallback = ->
   @layerGroup = @connectionLayer.registerUser(@nodeId)
 
   @connectedTo = []
-
   @initListeners_()
+  @drawConnections()
+
 
 Node.initListeners_ = ->
   @$el.on("p-dragstart", @dragStart_.bind(this))
   @$el.on("p-dragmove", @dragMove_.bind(this))
   @$el.on("p-dragend", @dragEnd_.bind(this))
 
-  @$connect = @$el.children(".node-connect")
-  @$connect.on("p-dragstart", @connectDragStart_.bind(this))
-  @$connect.on("p-dragmove", @connectDragMove_.bind(this))
-  @$connect.on("p-dragend", @connectDragEnd_.bind(this))
-
   @$layerGroup = $(@layerGroup)
-  @$layerGroup.on("p-dragstart", @layerGroupDragStart_.bind(this))
-  @$layerGroup.on("p-dragmove", @layerGroupDragMove_.bind(this))
-  @$layerGroup.on("p-dragend", @layerGroupDragEnd_.bind(this))
-
+  @$layerGroup.on("p-dragstart", @connectDragStart_.bind(this))
+  @$layerGroup.on("p-dragmove", @connectDragMove_.bind(this))
+  @$layerGroup.on("p-dragend", @connectDragEnd_.bind(this))
 
 
 ### ===========================================================================
@@ -56,6 +53,7 @@ Node.dragMove_ = (e) ->
     })
     @drawAllConnections(@nodeId)
 
+
 Node.dragEnd_ = (e) ->
   @dragStartOffset = null
   @drawAllConnections(@nodeId)
@@ -70,45 +68,39 @@ Node.dragEnd_ = (e) ->
 
 
 Node.connectDragStart_ = (e) ->
-  offset = @$el.offset()
-  width = @$el.outerWidth()
-  height = @$el.outerHeight()
-  @connectStart = [offset.left + width/2, offset.top + height/2]
+  nib = e.target
+  $nib = $(nib)
+
+  if $nib.is(".nib")
+    console.log nib.info
+    offset = @$el.offset()
+    width = @$el.outerWidth()
+    height = @$el.outerHeight()
+    @connectStartOffset = [offset.left + width/2, offset.top + height/2]
+
+    if nib.info?.to?
+      # Could be either from or to
+      @disconnectFrom(nib.info.to)
+      @disconnectFrom(nib.info.from)
+      @drawConnections(@nodeId)
+
 
 
 Node.connectDragMove_ = (e) ->
-    if @connectStart?
-      @drawConnections(@nodeId)
-      @connectionLayer.addLine(@nodeId, @connectStart, [e.pageX, e.pageY])
+  if @connectStartOffset?
+    @drawConnections(@nodeId)
+    @connectionLayer.addLine(@nodeId, @connectStartOffset, [e.pageX, e.pageY])
+
 
 
 Node.connectDragEnd_ = (e) ->
-    @connectStart = null
+  @connectStartOffset = null
 
-    $other = $(e.target).closest("p-node")
-    if ($other.length > 0) and ($other[0] isnt this)
-      @connectTo($other[0])
-      @drawConnections(@nodeId)
+  $other = $(e.target).closest("p-node")
+  if ($other.length > 0) and ($other[0] isnt this)
+    @connectTo($other[0])
 
-
-
-### ===========================================================================
-
-  layerGroup
-
-=========================================================================== ###
-
-
-Node.layerGroupDragStart_ = (e) ->
-  console.log e
-
-
-Node.layerGroupDragEnd_ = (e) ->
-  console.log e
-
-
-Node.layerGroupDragMove_ = (e) ->
-  console.log e
+  @drawConnections(@nodeId)
 
 
 
@@ -124,6 +116,11 @@ Node.drawConnections = ->
   for other in @connectedTo
     @connectionLayer.addLineEl(@nodeId, this, other)
 
+  offset = @$el.offset()
+  width = @$el.outerWidth()
+  height = @$el.outerHeight()
+  @connectionLayer.addNib(@nodeId, offset.left + width/2, offset.top + height)
+
 
 Node.drawAllConnections = ->
   all = document.querySelectorAll("p-node")
@@ -133,6 +130,13 @@ Node.drawAllConnections = ->
 
 Node.connectTo = (other) ->
   @connectedTo = _.union(@connectedTo, [other])
+
+
+Node.disconnectFrom = (other) ->
+  console.log "disconnect: ", other
+  console.log @connectedTo
+  @connectedTo = _.without(@connectedTo, other)
+  console.log @connectedTo
 
 
 document.register("p-node", {

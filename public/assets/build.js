@@ -38,7 +38,13 @@
     };
 
     Drag.prototype.startDrag = function(e) {
-      return this.draggedTarget = e.target;
+      var $parents, target;
+      target = e.target;
+      $parents = $(target).closest(".nodeGroup");
+      if ($parents.length > 0) {
+        target = $parents[0];
+      }
+      return this.draggedTarget = target;
     };
 
     Drag.prototype.contDrag = function(e) {
@@ -86,7 +92,9 @@
 
 },{"./ConnectionLayer.coffee":4,"./Node.coffee":5}],4:[function(require,module,exports){
 (function() {
-  var ConnectionLayer, html;
+  var ConnectionLayer, html, util;
+
+  util = require("../util.coffee");
 
   ConnectionLayer = Object.create(HTMLElement.prototype);
 
@@ -104,21 +112,32 @@
     group = document.createElementNS("http://www.w3.org/2000/svg", "g");
     this.svg.appendChild(group);
     this.users[id] = group;
+    group.classList.add("nodeGroup");
     return group;
   };
 
   ConnectionLayer.addLineEl = function(id, fromEl, toEl) {
     var fromMiddle, toMiddle;
-    fromMiddle = this.getElMiddle(fromEl);
-    toMiddle = this.getElMiddle(toEl);
+    fromMiddle = util.getElMiddle(fromEl);
+    toMiddle = util.getElMiddle(toEl);
     this.addLine(id, fromMiddle, toMiddle);
     this.addTip(id, fromEl, toEl, fromMiddle, toMiddle);
     return this.addTip(id, toEl, fromEl, toMiddle, fromMiddle);
   };
 
-  ConnectionLayer.addTip = function(id, fromEl, toEl, fromMiddle, toMiddle) {
-    var $fromEl, circle, from, fromHeight, fromOffset, fromWidth, group, intersections, lineTo, lines, nearest, to, valid;
+  ConnectionLayer.addNib = function(id, x, y) {
+    var circle, group;
     group = this.users[id];
+    circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", 32);
+    circle.classList.add("nib");
+    return group.appendChild(circle);
+  };
+
+  ConnectionLayer.addTip = function(id, fromEl, toEl, fromMiddle, toMiddle) {
+    var $fromEl, from, fromHeight, fromOffset, fromWidth, intersections, lineTo, lines, nearest, nib, to, valid;
     $fromEl = $(fromEl);
     fromOffset = $fromEl.offset();
     fromWidth = $fromEl.outerWidth();
@@ -148,11 +167,11 @@
       intersection.elements.splice(2, 1);
       return intersection.distanceFrom(to);
     });
-    circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circle.setAttribute("cx", nearest.elements[0]);
-    circle.setAttribute("cy", nearest.elements[1]);
-    circle.setAttribute("r", 30);
-    return group.appendChild(circle);
+    nib = this.addNib(id, nearest.elements[0], nearest.elements[1]);
+    return nib.info = {
+      from: fromEl,
+      to: toEl
+    };
   };
 
   ConnectionLayer.addLine = function(id, from, to) {
@@ -175,7 +194,7 @@
   ConnectionLayer.clear = function(id) {
     var group;
     group = this.users[id];
-    return group.innerHTML = "";
+    return group != null ? group.innerHTML = "" : void 0;
   };
 
   ConnectionLayer.makeLineSimple = function(from, to) {
@@ -188,24 +207,17 @@
     return newLine;
   };
 
-  ConnectionLayer.getElMiddle = function(el) {
-    var $el, height, offset, width;
-    $el = $(el);
-    offset = $el.offset();
-    width = $el.outerWidth();
-    height = $el.outerHeight();
-    return [offset.left + width / 2, offset.top + height / 2];
-  };
-
   document.register("p-connection-layer", {
     prototype: ConnectionLayer
   });
 
 }).call(this);
 
-},{}],5:[function(require,module,exports){
+},{"../util.coffee":6}],5:[function(require,module,exports){
 (function() {
-  var Node, html;
+  var Node, html, util;
+
+  util = require("../util.coffee");
 
   Node = Object.create(HTMLElement.prototype);
 
@@ -218,21 +230,18 @@
     this.nodeId = this.getAttribute("node-id");
     this.layerGroup = this.connectionLayer.registerUser(this.nodeId);
     this.connectedTo = [];
-    return this.initListeners_();
+    this.initListeners_();
+    return this.drawConnections();
   };
 
   Node.initListeners_ = function() {
     this.$el.on("p-dragstart", this.dragStart_.bind(this));
     this.$el.on("p-dragmove", this.dragMove_.bind(this));
     this.$el.on("p-dragend", this.dragEnd_.bind(this));
-    this.$connect = this.$el.children(".node-connect");
-    this.$connect.on("p-dragstart", this.connectDragStart_.bind(this));
-    this.$connect.on("p-dragmove", this.connectDragMove_.bind(this));
-    this.$connect.on("p-dragend", this.connectDragEnd_.bind(this));
     this.$layerGroup = $(this.layerGroup);
-    this.$layerGroup.on("p-dragstart", this.layerGroupDragStart_.bind(this));
-    this.$layerGroup.on("p-dragmove", this.layerGroupDragMove_.bind(this));
-    return this.$layerGroup.on("p-dragend", this.layerGroupDragEnd_.bind(this));
+    this.$layerGroup.on("p-dragstart", this.connectDragStart_.bind(this));
+    this.$layerGroup.on("p-dragmove", this.connectDragMove_.bind(this));
+    return this.$layerGroup.on("p-dragend", this.connectDragEnd_.bind(this));
   };
 
   /* ===========================================================================
@@ -276,48 +285,38 @@
 
 
   Node.connectDragStart_ = function(e) {
-    var height, offset, width;
-    offset = this.$el.offset();
-    width = this.$el.outerWidth();
-    height = this.$el.outerHeight();
-    return this.connectStart = [offset.left + width / 2, offset.top + height / 2];
+    var $nib, height, nib, offset, width, _ref;
+    nib = e.target;
+    $nib = $(nib);
+    if ($nib.is(".nib")) {
+      console.log(nib.info);
+      offset = this.$el.offset();
+      width = this.$el.outerWidth();
+      height = this.$el.outerHeight();
+      this.connectStartOffset = [offset.left + width / 2, offset.top + height / 2];
+      if (((_ref = nib.info) != null ? _ref.to : void 0) != null) {
+        this.disconnectFrom(nib.info.to);
+        this.disconnectFrom(nib.info.from);
+        return this.drawConnections(this.nodeId);
+      }
+    }
   };
 
   Node.connectDragMove_ = function(e) {
-    if (this.connectStart != null) {
+    if (this.connectStartOffset != null) {
       this.drawConnections(this.nodeId);
-      return this.connectionLayer.addLine(this.nodeId, this.connectStart, [e.pageX, e.pageY]);
+      return this.connectionLayer.addLine(this.nodeId, this.connectStartOffset, [e.pageX, e.pageY]);
     }
   };
 
   Node.connectDragEnd_ = function(e) {
     var $other;
-    this.connectStart = null;
+    this.connectStartOffset = null;
     $other = $(e.target).closest("p-node");
     if (($other.length > 0) && ($other[0] !== this)) {
       this.connectTo($other[0]);
-      return this.drawConnections(this.nodeId);
     }
-  };
-
-  /* ===========================================================================
-  
-    layerGroup
-  
-  ===========================================================================
-  */
-
-
-  Node.layerGroupDragStart_ = function(e) {
-    return console.log(e);
-  };
-
-  Node.layerGroupDragEnd_ = function(e) {
-    return console.log(e);
-  };
-
-  Node.layerGroupDragMove_ = function(e) {
-    return console.log(e);
+    return this.drawConnections(this.nodeId);
   };
 
   /* ===========================================================================
@@ -329,15 +328,17 @@
 
 
   Node.drawConnections = function() {
-    var other, _i, _len, _ref, _results;
+    var height, offset, other, width, _i, _len, _ref;
     this.connectionLayer.clear(this.nodeId);
     _ref = this.connectedTo;
-    _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       other = _ref[_i];
-      _results.push(this.connectionLayer.addLineEl(this.nodeId, this, other));
+      this.connectionLayer.addLineEl(this.nodeId, this, other);
     }
-    return _results;
+    offset = this.$el.offset();
+    width = this.$el.outerWidth();
+    height = this.$el.outerHeight();
+    return this.connectionLayer.addNib(this.nodeId, offset.left + width / 2, offset.top + height);
   };
 
   Node.drawAllConnections = function() {
@@ -355,9 +356,35 @@
     return this.connectedTo = _.union(this.connectedTo, [other]);
   };
 
+  Node.disconnectFrom = function(other) {
+    console.log("disconnect: ", other);
+    console.log(this.connectedTo);
+    this.connectedTo = _.without(this.connectedTo, other);
+    return console.log(this.connectedTo);
+  };
+
   document.register("p-node", {
     prototype: Node
   });
+
+}).call(this);
+
+},{"../util.coffee":6}],6:[function(require,module,exports){
+(function() {
+  var util;
+
+  util = {};
+
+  util.getElMiddle = function(el) {
+    var $el, height, offset, width;
+    $el = $(el);
+    offset = $el.offset();
+    width = $el.outerWidth();
+    height = $el.outerHeight();
+    return [offset.left + width / 2, offset.top + height / 2];
+  };
+
+  module.exports = util;
 
 }).call(this);
 

@@ -12,7 +12,14 @@ class Drag
     @$root.on("mouseup", @endDrag)
 
   startDrag: (e) =>
-    @draggedTarget = e.target
+    target = e.target
+
+    # HACK: svg stuff gets deleted a lot, so fire on g's
+    $parents = $(target).closest(".nodeGroup")
+    if $parents.length > 0
+      target = $parents[0]
+
+    @draggedTarget = target
 
   contDrag: (e) =>
     if @draggedTarget?

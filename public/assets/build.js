@@ -143,6 +143,14 @@
 
   util = {};
 
+  util.setCursor = function(type) {
+    if (type != null) {
+      return document.body.setAttribute("data-cursor", type);
+    } else {
+      return document.body.removeAttribute("data-cursor");
+    }
+  };
+
   util.getElOuterBox = function(el) {
     var $el, box;
     $el = $(el);

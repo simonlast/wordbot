@@ -13,6 +13,15 @@ ConnectionLayer.insertedCallback = ->
   @users = {}
 
 
+
+### ===========================================================================
+
+  Public
+
+=========================================================================== ###
+
+
+# Must be called before use. Id must be unique.
 ConnectionLayer.registerUser = (id) ->
   group = document.createElementNS("http://www.w3.org/2000/svg", "g")
   @svg.appendChild(group)
@@ -21,30 +30,31 @@ ConnectionLayer.registerUser = (id) ->
   return group
 
 
+# Draw an edge from one el to another, including a nib and either end.
 ConnectionLayer.addLineEl = (id, fromEl, toEl) ->
   fromMiddle = util.getElMiddle(fromEl)
   toMiddle = util.getElMiddle(toEl)
   @addLine(id, fromMiddle, toMiddle)
-  @addTip(id, fromEl, toEl, fromMiddle, toMiddle)
-  @addTip(id, toEl, fromEl, toMiddle, fromMiddle)
+  @addTip(id, fromEl, toEl)
+  @addTip(id, toEl, fromEl)
 
 
-ConnectionLayer.addNib = (id, x, y) ->
+# Draw a nib at location [x, y]
+ConnectionLayer.addNib = (id, x, y, rad=30) ->
   group = @users[id]
   circle = document.createElementNS("http://www.w3.org/2000/svg", "circle")
   circle.setAttribute("cx", x)
   circle.setAttribute("cy", y)
-  circle.setAttribute("r", 32)
+  circle.setAttribute("r", rad)
   circle.classList.add("nib")
   group.appendChild(circle)
 
 
-
-ConnectionLayer.addTip = (id, fromEl, toEl, fromMiddle, toMiddle) ->
-  $fromEl = $(fromEl)
-  fromOffset = $fromEl.offset()
-  fromWidth = $fromEl.outerWidth()
-  fromHeight = $fromEl.outerHeight()
+# Adds a nib at the proper location, going from fromEl to toEl
+ConnectionLayer.addTip = (id, fromEl, toEl) ->
+  fromBox = util.getElOuterBox(fromEl)
+  fromMiddle = util.getElMiddle(fromEl)
+  toMiddle = util.getElMiddle(toEl)
 
   from = $V(fromMiddle)
   to = $V(toMiddle)
@@ -52,10 +62,10 @@ ConnectionLayer.addTip = (id, fromEl, toEl, fromMiddle, toMiddle) ->
 
   # lines for element rect
   lines = [
-     $L($V([fromOffset.left, fromOffset.top]), $V([0,1])) # left
-     $L($V([fromOffset.left, fromOffset.top]), $V([1,0])) # top
-     $L($V([fromOffset.left + fromWidth, fromOffset.top]), $V([0,1])) # right
-     $L($V([fromOffset.left, fromOffset.top + fromHeight]), $V([1,0])) # right
+     $L($V([fromBox.left, fromBox.top]), $V([0,1])) # left
+     $L($V([fromBox.left, fromBox.top]), $V([1,0])) # top
+     $L($V([fromBox.left + fromBox.width, fromBox.top]), $V([0,1])) # right
+     $L($V([fromBox.left, fromBox.top + fromBox.height]), $V([1,0])) # right
   ]
 
   intersections = _.map lines, (line) ->
@@ -65,9 +75,9 @@ ConnectionLayer.addTip = (id, fromEl, toEl, fromMiddle, toMiddle) ->
   valid = _.filter intersections, (intersection) ->
     return if not intersection?
     v = intersection.elements
-    if (v[0] < fromOffset.left or v[0] > fromOffset.left + fromWidth)
+    if (v[0] < fromBox.left or v[0] > fromBox.left + fromBox.width)
       return false
-    if (v[1] < fromOffset.top or v[1] > fromOffset.top + fromHeight)
+    if (v[1] < fromBox.top or v[1] > fromBox.top + fromBox.height)
       return false
     return true
 
@@ -102,7 +112,7 @@ ConnectionLayer.addLine = (id, from, to) ->
   sub = from.subtract(to)
   sub = sub.rotate(Math.PI/2, $V([0,0]))
   sub = sub.toUnitVector()
-  sub = sub.multiply(12)
+  sub = sub.multiply(18)
 
   group.appendChild(@makeLineSimple(from.add(sub).elements, to.elements))
   group.appendChild(@makeLineSimple(from.subtract(sub).elements, to.elements))

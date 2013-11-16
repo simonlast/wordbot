@@ -78,11 +78,14 @@ p-connection-layer g{
 
 p-connection-layer line{
   stroke: @connections;
-  stroke-width: 12px;
+  stroke-width: 16px;
   stroke-linecap: round;
   -webkit-transition: stroke 200ms ease;
 }
 
+p-connection-layer circle:hover{
+  opacity: 1;
+}
 
 p-connection-layer circle{
   stroke: none;
@@ -90,6 +93,7 @@ p-connection-layer circle{
   -webkit-transition: stroke 200ms ease;
   cursor: -webkit-grab;
   opacity: .7;
+  .ease;
 }
 
 
@@ -117,31 +121,4 @@ p-node .node-text{
 
   font-family: Helvetica;
   font-weight: 100;
-}
-
-p-node:hover .node-connect, p-node:active .node-connect{
-  .scale(1);
-  opacity: 1;
-}
-
-.node-connect:hover{
-  .scale(1);
-  opacity: 1;
-}
-
-p-node .node-connect{
-  position: absolute;
-  bottom: -8px;
-  right: -8px;
-  width: 32px;
-  height: 32px;
-  border-radius: 100%;
-  border: none;
-  outline: none;
-  background-color: @secondary;
-  border: 6px solid @dark;
-  cursor: pointer;
-  .ease;
-  .scale(.7);
-  opacity: 0;
 }

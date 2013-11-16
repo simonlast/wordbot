@@ -4,7 +4,6 @@ Node = Object.create(HTMLElement.prototype)
 
 html = """
   <input class="node-text"></input>
-  <button class="node-connect"></button>
 """
 
 Node.insertedCallback = ->
@@ -72,7 +71,6 @@ Node.connectDragStart_ = (e) ->
   $nib = $(nib)
 
   if $nib.is(".nib")
-    console.log nib.info
     offset = @$el.offset()
     width = @$el.outerWidth()
     height = @$el.outerHeight()
@@ -90,6 +88,7 @@ Node.connectDragMove_ = (e) ->
   if @connectStartOffset?
     @drawConnections(@nodeId)
     @connectionLayer.addLine(@nodeId, @connectStartOffset, [e.pageX, e.pageY])
+    @connectionLayer.addNib(@nodeId, e.pageX, e.pageY)
 
 
 
@@ -119,7 +118,7 @@ Node.drawConnections = ->
   offset = @$el.offset()
   width = @$el.outerWidth()
   height = @$el.outerHeight()
-  @connectionLayer.addNib(@nodeId, offset.left + width/2, offset.top + height)
+  @connectionLayer.addNib(@nodeId, offset.left + width/2, offset.top + height, 38)
 
 
 Node.drawAllConnections = ->
@@ -133,10 +132,7 @@ Node.connectTo = (other) ->
 
 
 Node.disconnectFrom = (other) ->
-  console.log "disconnect: ", other
-  console.log @connectedTo
   @connectedTo = _.without(@connectedTo, other)
-  console.log @connectedTo
 
 
 document.register("p-node", {

@@ -107,6 +107,14 @@
     return this.users = {};
   };
 
+  /* ===========================================================================
+  
+    Public
+  
+  ===========================================================================
+  */
+
+
   ConnectionLayer.registerUser = function(id) {
     var group;
     group = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -121,31 +129,33 @@
     fromMiddle = util.getElMiddle(fromEl);
     toMiddle = util.getElMiddle(toEl);
     this.addLine(id, fromMiddle, toMiddle);
-    this.addTip(id, fromEl, toEl, fromMiddle, toMiddle);
-    return this.addTip(id, toEl, fromEl, toMiddle, fromMiddle);
+    this.addTip(id, fromEl, toEl);
+    return this.addTip(id, toEl, fromEl);
   };
 
-  ConnectionLayer.addNib = function(id, x, y) {
+  ConnectionLayer.addNib = function(id, x, y, rad) {
     var circle, group;
+    if (rad == null) {
+      rad = 30;
+    }
     group = this.users[id];
     circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     circle.setAttribute("cx", x);
     circle.setAttribute("cy", y);
-    circle.setAttribute("r", 32);
+    circle.setAttribute("r", rad);
     circle.classList.add("nib");
     return group.appendChild(circle);
   };
 
-  ConnectionLayer.addTip = function(id, fromEl, toEl, fromMiddle, toMiddle) {
-    var $fromEl, from, fromHeight, fromOffset, fromWidth, intersections, lineTo, lines, nearest, nib, to, valid;
-    $fromEl = $(fromEl);
-    fromOffset = $fromEl.offset();
-    fromWidth = $fromEl.outerWidth();
-    fromHeight = $fromEl.outerHeight();
+  ConnectionLayer.addTip = function(id, fromEl, toEl) {
+    var from, fromBox, fromMiddle, intersections, lineTo, lines, nearest, nib, to, toMiddle, valid;
+    fromBox = util.getElOuterBox(fromEl);
+    fromMiddle = util.getElMiddle(fromEl);
+    toMiddle = util.getElMiddle(toEl);
     from = $V(fromMiddle);
     to = $V(toMiddle);
     lineTo = $L(from, to.subtract(from));
-    lines = [$L($V([fromOffset.left, fromOffset.top]), $V([0, 1])), $L($V([fromOffset.left, fromOffset.top]), $V([1, 0])), $L($V([fromOffset.left + fromWidth, fromOffset.top]), $V([0, 1])), $L($V([fromOffset.left, fromOffset.top + fromHeight]), $V([1, 0]))];
+    lines = [$L($V([fromBox.left, fromBox.top]), $V([0, 1])), $L($V([fromBox.left, fromBox.top]), $V([1, 0])), $L($V([fromBox.left + fromBox.width, fromBox.top]), $V([0, 1])), $L($V([fromBox.left, fromBox.top + fromBox.height]), $V([1, 0]))];
     intersections = _.map(lines, function(line) {
       return line.intersectionWith(lineTo);
     });
@@ -155,10 +165,10 @@
         return;
       }
       v = intersection.elements;
-      if (v[0] < fromOffset.left || v[0] > fromOffset.left + fromWidth) {
+      if (v[0] < fromBox.left || v[0] > fromBox.left + fromBox.width) {
         return false;
       }
-      if (v[1] < fromOffset.top || v[1] > fromOffset.top + fromHeight) {
+      if (v[1] < fromBox.top || v[1] > fromBox.top + fromBox.height) {
         return false;
       }
       return true;
@@ -186,7 +196,7 @@
     sub = from.subtract(to);
     sub = sub.rotate(Math.PI / 2, $V([0, 0]));
     sub = sub.toUnitVector();
-    sub = sub.multiply(12);
+    sub = sub.multiply(18);
     group.appendChild(this.makeLineSimple(from.add(sub).elements, to.elements));
     return group.appendChild(this.makeLineSimple(from.subtract(sub).elements, to.elements));
   };
@@ -221,7 +231,7 @@
 
   Node = Object.create(HTMLElement.prototype);
 
-  html = "<input class=\"node-text\"></input>\n<button class=\"node-connect\"></button>";
+  html = "<input class=\"node-text\"></input>";
 
   Node.insertedCallback = function() {
     this.$el = $(this);
@@ -289,7 +299,6 @@
     nib = e.target;
     $nib = $(nib);
     if ($nib.is(".nib")) {
-      console.log(nib.info);
       offset = this.$el.offset();
       width = this.$el.outerWidth();
       height = this.$el.outerHeight();
@@ -305,7 +314,8 @@
   Node.connectDragMove_ = function(e) {
     if (this.connectStartOffset != null) {
       this.drawConnections(this.nodeId);
-      return this.connectionLayer.addLine(this.nodeId, this.connectStartOffset, [e.pageX, e.pageY]);
+      this.connectionLayer.addLine(this.nodeId, this.connectStartOffset, [e.pageX, e.pageY]);
+      return this.connectionLayer.addNib(this.nodeId, e.pageX, e.pageY);
     }
   };
 
@@ -338,7 +348,7 @@
     offset = this.$el.offset();
     width = this.$el.outerWidth();
     height = this.$el.outerHeight();
-    return this.connectionLayer.addNib(this.nodeId, offset.left + width / 2, offset.top + height);
+    return this.connectionLayer.addNib(this.nodeId, offset.left + width / 2, offset.top + height, 38);
   };
 
   Node.drawAllConnections = function() {
@@ -357,10 +367,7 @@
   };
 
   Node.disconnectFrom = function(other) {
-    console.log("disconnect: ", other);
-    console.log(this.connectedTo);
-    this.connectedTo = _.without(this.connectedTo, other);
-    return console.log(this.connectedTo);
+    return this.connectedTo = _.without(this.connectedTo, other);
   };
 
   document.register("p-node", {
@@ -375,13 +382,19 @@
 
   util = {};
 
-  util.getElMiddle = function(el) {
-    var $el, height, offset, width;
+  util.getElOuterBox = function(el) {
+    var $el, box;
     $el = $(el);
-    offset = $el.offset();
-    width = $el.outerWidth();
-    height = $el.outerHeight();
-    return [offset.left + width / 2, offset.top + height / 2];
+    box = $el.offset();
+    box.width = $el.outerWidth();
+    box.height = $el.outerHeight();
+    return box;
+  };
+
+  util.getElMiddle = function(el) {
+    var box;
+    box = util.getElOuterBox(el);
+    return [box.left + box.width / 2, box.top + box.height / 2];
   };
 
   module.exports = util;

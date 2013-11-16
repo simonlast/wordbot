@@ -1,21 +1,24 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
 (function() {
-  var Drag, setup;
+  var Create, Drag, setup;
 
   require("./components/loadAll.coffee");
 
   Drag = require("./polyfill.coffee");
 
+  Create = require("./create.coffee");
+
   setup = function() {
-    var drag;
-    return drag = new Drag();
+    var create, drag;
+    drag = new Drag();
+    return create = new Create();
   };
 
-  window.onload = setup;
+  $(setup);
 
 }).call(this);
 
-},{"./components/loadAll.coffee":2,"./polyfill.coffee":3}],3:[function(require,module,exports){
+},{"./components/loadAll.coffee":2,"./polyfill.coffee":3,"./create.coffee":4}],3:[function(require,module,exports){
 (function() {
   var Drag,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -82,7 +85,51 @@
 
 }).call(this);
 
-},{}],2:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
+(function() {
+  var Create, util,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  util = require("./util.coffee");
+
+  Create = (function() {
+    function Create() {
+      this.addNewNode_ = __bind(this.addNewNode_, this);
+      this.nodeContainer = document.querySelector(".node-container");
+      this.initListeners_();
+    }
+
+    Create.prototype.initListeners_ = function() {
+      var $doc;
+      $doc = $(document);
+      return $doc.on("dblclick", this.addNewNode_);
+    };
+
+    Create.prototype.addNewNode_ = function(e) {
+      var $target, box, closestNode, node;
+      $target = $(e.target);
+      closestNode = $target.closest("p-node")[0];
+      if (closestNode == null) {
+        node = document.createElement("p-node");
+        node.setAttribute("node-id", Math.floor(Math.random() * 1e20));
+        this.nodeContainer.appendChild(node);
+        box = util.getElOuterBox(node);
+        return $(node).css({
+          left: (e.pageX - box.width / 2) + "px",
+          top: (e.pageY - box.height / 2) + "px"
+        });
+      }
+    };
+
+    return Create;
+
+  })();
+
+  module.exports = Create;
+
+}).call(this);
+
+},{"./util.coffee":5}],2:[function(require,module,exports){
 (function() {
   require("./ConnectionLayer.coffee");
 
@@ -90,7 +137,32 @@
 
 }).call(this);
 
-},{"./ConnectionLayer.coffee":4,"./Node.coffee":5}],4:[function(require,module,exports){
+},{"./ConnectionLayer.coffee":6,"./Node.coffee":7}],5:[function(require,module,exports){
+(function() {
+  var util;
+
+  util = {};
+
+  util.getElOuterBox = function(el) {
+    var $el, box;
+    $el = $(el);
+    box = $el.offset();
+    box.width = $el.outerWidth();
+    box.height = $el.outerHeight();
+    return box;
+  };
+
+  util.getElMiddle = function(el) {
+    var box;
+    box = util.getElOuterBox(el);
+    return [box.left + box.width / 2, box.top + box.height / 2];
+  };
+
+  module.exports = util;
+
+}).call(this);
+
+},{}],6:[function(require,module,exports){
 (function() {
   var ConnectionLayer, html, util;
 
@@ -196,7 +268,7 @@
     sub = from.subtract(to);
     sub = sub.rotate(Math.PI / 2, $V([0, 0]));
     sub = sub.toUnitVector();
-    sub = sub.multiply(18);
+    sub = sub.multiply(12);
     group.appendChild(this.makeLineSimple(from.add(sub).elements, to.elements));
     return group.appendChild(this.makeLineSimple(from.subtract(sub).elements, to.elements));
   };
@@ -223,7 +295,7 @@
 
 }).call(this);
 
-},{"../util.coffee":6}],5:[function(require,module,exports){
+},{"../util.coffee":5}],7:[function(require,module,exports){
 (function() {
   var Node, html, util;
 
@@ -245,6 +317,7 @@
   };
 
   Node.initListeners_ = function() {
+    this.$el.on("mousedown", this.mouseDown.bind(this));
     this.$el.on("p-dragstart", this.dragStart_.bind(this));
     this.$el.on("p-dragmove", this.dragMove_.bind(this));
     this.$el.on("p-dragend", this.dragEnd_.bind(this));
@@ -252,6 +325,18 @@
     this.$layerGroup.on("p-dragstart", this.connectDragStart_.bind(this));
     this.$layerGroup.on("p-dragmove", this.connectDragMove_.bind(this));
     return this.$layerGroup.on("p-dragend", this.connectDragEnd_.bind(this));
+  };
+
+  /* ===========================================================================
+  
+    Selection
+  
+  ===========================================================================
+  */
+
+
+  Node.mouseDown = function(e) {
+    return this.select();
   };
 
   /* ===========================================================================
@@ -320,11 +405,11 @@
   };
 
   Node.connectDragEnd_ = function(e) {
-    var $other;
+    var other;
     this.connectStartOffset = null;
-    $other = $(e.target).closest("p-node");
-    if (($other.length > 0) && ($other[0] !== this)) {
-      this.connectTo($other[0]);
+    other = $(e.target).closest("p-node")[0];
+    if ((other != null) && other !== this) {
+      this.connectTo(other);
     }
     return this.drawConnections(this.nodeId);
   };
@@ -336,6 +421,16 @@
   ===========================================================================
   */
 
+
+  Node.select = function() {
+    var el, others, _i, _len;
+    others = this.parentElement.querySelectorAll(".active");
+    for (_i = 0, _len = others.length; _i < _len; _i++) {
+      el = others[_i];
+      el.classList.remove("active");
+    }
+    return this.classList.add("active");
+  };
 
   Node.drawConnections = function() {
     var height, offset, other, width, _i, _len, _ref;
@@ -376,30 +471,5 @@
 
 }).call(this);
 
-},{"../util.coffee":6}],6:[function(require,module,exports){
-(function() {
-  var util;
-
-  util = {};
-
-  util.getElOuterBox = function(el) {
-    var $el, box;
-    $el = $(el);
-    box = $el.offset();
-    box.width = $el.outerWidth();
-    box.height = $el.outerHeight();
-    return box;
-  };
-
-  util.getElMiddle = function(el) {
-    var box;
-    box = util.getElOuterBox(el);
-    return [box.left + box.width / 2, box.top + box.height / 2];
-  };
-
-  module.exports = util;
-
-}).call(this);
-
-},{}]},{},[1])
+},{"../util.coffee":5}]},{},[1])
 ;

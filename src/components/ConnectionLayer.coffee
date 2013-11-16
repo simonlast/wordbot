@@ -112,7 +112,7 @@ ConnectionLayer.addLine = (id, from, to) ->
   sub = from.subtract(to)
   sub = sub.rotate(Math.PI/2, $V([0,0]))
   sub = sub.toUnitVector()
-  sub = sub.multiply(18)
+  sub = sub.multiply(12)
 
   group.appendChild(@makeLineSimple(from.add(sub).elements, to.elements))
   group.appendChild(@makeLineSimple(from.subtract(sub).elements, to.elements))

@@ -31,7 +31,7 @@ p-connection-layer g {
 }
 p-connection-layer line {
   stroke: #c2cbce;
-  stroke-width: 16px;
+  stroke-width: 12px;
   stroke-linecap: round;
   -webkit-transition: stroke 200ms ease;
 }
@@ -59,6 +59,13 @@ p-node {
   -webkit-user-select: none;
   padding: 18px;
   border-radius: 6px;
+  -webkit-transition: box-shadow 100ms ease-in-out;
+  -moz-transition: box-shadow 100ms ease-in-out;
+  -o-transition: box-shadow 100ms ease-in-out;
+  -ms-transition: box-shadow 100ms ease-in-out;
+}
+.active {
+  box-shadow: 0 0 24px #a4bcc2;
 }
 p-node .node-text {
   text-align: center;

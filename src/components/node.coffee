@@ -20,6 +20,8 @@ Node.insertedCallback = ->
 
 
 Node.initListeners_ = ->
+  @$el.on("mousedown", @mouseDown.bind(this))
+
   @$el.on("p-dragstart", @dragStart_.bind(this))
   @$el.on("p-dragmove", @dragMove_.bind(this))
   @$el.on("p-dragend", @dragEnd_.bind(this))
@@ -28,6 +30,19 @@ Node.initListeners_ = ->
   @$layerGroup.on("p-dragstart", @connectDragStart_.bind(this))
   @$layerGroup.on("p-dragmove", @connectDragMove_.bind(this))
   @$layerGroup.on("p-dragend", @connectDragEnd_.bind(this))
+
+
+
+### ===========================================================================
+
+  Selection
+
+=========================================================================== ###
+
+
+Node.mouseDown = (e) ->
+  @select()
+
 
 
 ### ===========================================================================
@@ -95,9 +110,9 @@ Node.connectDragMove_ = (e) ->
 Node.connectDragEnd_ = (e) ->
   @connectStartOffset = null
 
-  $other = $(e.target).closest("p-node")
-  if ($other.length > 0) and ($other[0] isnt this)
-    @connectTo($other[0])
+  other = $(e.target).closest("p-node")[0]
+  if (other? and other isnt this)
+    @connectTo(other)
 
   @drawConnections(@nodeId)
 
@@ -108,6 +123,13 @@ Node.connectDragEnd_ = (e) ->
   Helpers
 
 =========================================================================== ###
+
+Node.select = ->
+  others = @parentElement.querySelectorAll(".active")
+  for el in others
+    el.classList.remove("active")
+
+  @classList.add("active")
 
 
 Node.drawConnections = ->

@@ -78,7 +78,7 @@ p-connection-layer g{
 
 p-connection-layer line{
   stroke: @connections;
-  stroke-width: 16px;
+  stroke-width: 12px;
   stroke-linecap: round;
   -webkit-transition: stroke 200ms ease;
 }
@@ -105,6 +105,11 @@ p-node{
   .noselect;
   padding: 18px;
   border-radius: 6px;
+  .ease(100ms, box-shadow);
+}
+
+.active{
+  box-shadow: 0 0 24px @dark;
 }
 
 p-node .node-text{

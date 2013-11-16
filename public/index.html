@@ -2,13 +2,23 @@
 <html>
   <head>
     <title>Title</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
     <link type="text/css" rel="stylesheet" href="/styles/style.css"/>
     <link rel="shortcut icon" href="http://www.gravatar.com/avatar/3b964d84fcfbcdf59089c8bd7309f0b7.ico" />
   </head>
   <body>
 
-    <p-connection-layer></p-connection-layer>
-    <div class="node-container">
+    <div class="col-container row row-offcanvas row-offcanvas-right">
+
+      <div class="graph col-xs-12 col-sm-9">
+        <p-connection-layer></p-connection-layer>
+        <div class="node-container"></div>
+      </div>
+
+      <div class="conversation col-xs-6 col-sm-3 sidebar-offcanvas">
+        <p-conversation></p-conversation>
+      </div>
+
     </div>
 
     <script type="text/javascript" src="/assets/sylvester.js"></script>

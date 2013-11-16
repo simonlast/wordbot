@@ -137,10 +137,8 @@ Node.drawConnections = ->
   for other in @connectedTo
     @connectionLayer.addLineEl(@nodeId, this, other)
 
-  offset = @$el.offset()
-  width = @$el.outerWidth()
-  height = @$el.outerHeight()
-  @connectionLayer.addNib(@nodeId, offset.left + width/2, offset.top + height, 38)
+  elBox = util.getElOuterBox(this)
+  @connectionLayer.addNib(@nodeId, elBox.left + elBox.width/2, elBox.top + elBox.height, 38)
 
 
 Node.drawAllConnections = ->

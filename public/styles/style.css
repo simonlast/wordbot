@@ -6,6 +6,10 @@
   -khtml-user-select: none;
   -webkit-user-select: none;
 }
+html,
+body {
+  height: 100%;
+}
 body {
   background-color: #fdfdfd;
   font-family: 'Helvetica Light', 'Helvetica';
@@ -14,10 +18,27 @@ body {
   color: #646464;
   margin: 0;
 }
+.col-container {
+  height: 100%;
+  margin: 0;
+}
+.graph {
+  height: 100%;
+  position: relative;
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+}
+.conversation {
+  height: 100%;
+}
 .node-container {
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 p-connection-layer {
   width: 100%;
@@ -50,6 +71,7 @@ p-connection-layer circle {
   -ms-transition: all 100ms ease-in-out;
 }
 p-node {
+  pointer-events: auto;
   background-color: #a4bcc2;
   width: 240px;
   position: absolute;
@@ -80,4 +102,12 @@ p-node .node-text {
   border-radius: 6px;
   font-family: Helvetica;
   font-weight: 100;
+}
+p-conversation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #a4bcc2;
 }

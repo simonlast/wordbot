@@ -135,9 +135,11 @@
 
   require("./Node.coffee");
 
+  require("./Conversation.coffee");
+
 }).call(this);
 
-},{"./ConnectionLayer.coffee":6,"./Node.coffee":7}],5:[function(require,module,exports){
+},{"./ConnectionLayer.coffee":6,"./Node.coffee":7,"./Conversation.coffee":8}],5:[function(require,module,exports){
 (function() {
   var util;
 
@@ -155,6 +157,7 @@
     var $el, box;
     $el = $(el);
     box = $el.offset();
+    console.log(el, box);
     box.width = $el.outerWidth();
     box.height = $el.outerHeight();
     return box;
@@ -441,17 +444,15 @@
   };
 
   Node.drawConnections = function() {
-    var height, offset, other, width, _i, _len, _ref;
+    var elBox, other, _i, _len, _ref;
     this.connectionLayer.clear(this.nodeId);
     _ref = this.connectedTo;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       other = _ref[_i];
       this.connectionLayer.addLineEl(this.nodeId, this, other);
     }
-    offset = this.$el.offset();
-    width = this.$el.outerWidth();
-    height = this.$el.outerHeight();
-    return this.connectionLayer.addNib(this.nodeId, offset.left + width / 2, offset.top + height, 38);
+    elBox = util.getElOuterBox(this);
+    return this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 38);
   };
 
   Node.drawAllConnections = function() {
@@ -475,6 +476,30 @@
 
   document.register("p-node", {
     prototype: Node
+  });
+
+}).call(this);
+
+},{"../util.coffee":5}],8:[function(require,module,exports){
+(function() {
+  var Conversation, html, util;
+
+  util = require("../util.coffee");
+
+  Conversation = Object.create(HTMLElement.prototype);
+
+  html = "";
+
+  Conversation.insertedCallback = function() {
+    this.$el = $(this);
+    this.innerHTML = html;
+    return this.initListeners_();
+  };
+
+  Conversation.initListeners_ = function() {};
+
+  document.register("p-conversation", {
+    prototype: Conversation
   });
 
 }).call(this);

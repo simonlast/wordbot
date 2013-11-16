@@ -47,6 +47,10 @@
   -ms-transition: @what @time ease-in-out;
 }
 
+html, body{
+  height: 100%;
+}
+
 body{
 	background-color:@bkg;
 	font-family:'Helvetica Light', 'Helvetica';
@@ -56,10 +60,30 @@ body{
 	margin: 0;
 }
 
+.col-container{
+  height: 100%;
+  margin: 0;
+}
+
+.graph{
+  height: 100%;
+  position: relative;
+  .noselect;
+}
+
+.conversation{
+  height: 100%;
+}
+
+
+
 .node-container{
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 p-connection-layer{
@@ -69,7 +93,6 @@ p-connection-layer{
   top: 0;
   left: 0;
 }
-
 
 p-connection-layer g{
   opacity: .5;
@@ -98,6 +121,7 @@ p-connection-layer circle{
 
 
 p-node{
+  pointer-events: auto;
   background-color: @dark;
   width: 240px;
   position: absolute;
@@ -127,3 +151,19 @@ p-node .node-text{
   font-family: Helvetica;
   font-weight: 100;
 }
+
+
+p-conversation{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: @dark;
+}
+
+
+
+
+
+

@@ -1,3 +1,3 @@
 require("./ConnectionLayer.coffee")
-require("./Node.coffee")
+require("./node.coffee")
 require("./Conversation.coffee")

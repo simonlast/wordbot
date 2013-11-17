@@ -515,13 +515,13 @@
 (function() {
   require("./ConnectionLayer.coffee");
 
-  require("./Node.coffee");
+  require("./node.coffee");
 
   require("./Conversation.coffee");
 
 }).call(this);
 
-},{"./ConnectionLayer.coffee":9,"./Conversation.coffee":11,"./Node.coffee":10}],8:[function(require,module,exports){
+},{"./ConnectionLayer.coffee":9,"./Conversation.coffee":11,"./node.coffee":10}],8:[function(require,module,exports){
 (function() {
   var util;
 

@@ -28,10 +28,15 @@ Conversation.addOutput = (text) ->
 
 
 Conversation.addMessage = (text, type) ->
+  log = @querySelector(".log")
   p = document.createElement("p")
   p.classList.add(type)
   p.innerText = text
-  @querySelector(".log").appendChild(p)
+  log.appendChild(p)
+
+  # Auto-scroll
+  $log = $(log)
+  $log.scrollTop(log.scrollHeight)
 
 
 Conversation.initListeners_ = ->

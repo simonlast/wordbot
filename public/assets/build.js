@@ -659,11 +659,14 @@
   };
 
   Conversation.addMessage = function(text, type) {
-    var p;
+    var $log, log, p;
+    log = this.querySelector(".log");
     p = document.createElement("p");
     p.classList.add(type);
     p.innerText = text;
-    return this.querySelector(".log").appendChild(p);
+    log.appendChild(p);
+    $log = $(log);
+    return $log.scrollTop(log.scrollHeight);
   };
 
   Conversation.initListeners_ = function() {

@@ -154,6 +154,7 @@ p-conversation .conversation-input {
 p-conversation .log {
   height: 100%;
   overflow: scroll;
+  padding-bottom: 42px;
 }
 p-conversation .log p {
   margin: 8px;

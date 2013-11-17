@@ -11,8 +11,6 @@ util.setCursor = (type) ->
 util.getElOuterBox = (el) ->
   $el = $(el)
   box = $el.offset()
-  console.log el, box
-  # box.left += 15
   box.width = $el.outerWidth()
   box.height = $el.outerHeight()
   return box

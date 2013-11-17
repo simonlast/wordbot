@@ -40,7 +40,7 @@ ConnectionLayer.addLineEl = (id, fromEl, toEl) ->
 
 
 # Draw a nib at location [x, y]
-ConnectionLayer.addNib = (id, x, y, rad=30) ->
+ConnectionLayer.addNib = (id, x, y, rad=20) ->
   group = @users[id]
   circle = document.createElementNS("http://www.w3.org/2000/svg", "circle")
   circle.setAttribute("cx", x)

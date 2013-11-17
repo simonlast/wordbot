@@ -4,6 +4,7 @@ Node = Object.create(HTMLElement.prototype)
 
 html = """
   <input class="node-text"></input>
+  <button class="swap-type">↺</button>
 """
 
 Node.insertedCallback = ->
@@ -21,6 +22,7 @@ Node.insertedCallback = ->
 
 Node.initListeners_ = ->
   @$el.on("mousedown", @mouseDown.bind(this))
+  @$el.on("click", ".swap-type", @swapType_.bind(this))
 
   @$el.on("p-dragstart", @dragStart_.bind(this))
   @$el.on("p-dragmove", @dragMove_.bind(this))
@@ -31,6 +33,14 @@ Node.initListeners_ = ->
   @$layerGroup.on("p-dragmove", @connectDragMove_.bind(this))
   @$layerGroup.on("p-dragend", @connectDragEnd_.bind(this))
 
+
+Node.getValue = ->
+  @querySelector(".node-text").value
+
+
+
+Node.swapType_ = (e) ->
+  @classList.toggle("output")
 
 
 ### ===========================================================================
@@ -138,7 +148,7 @@ Node.drawConnections = ->
     @connectionLayer.addLineEl(@nodeId, this, other)
 
   elBox = util.getElOuterBox(this)
-  @connectionLayer.addNib(@nodeId, elBox.left + elBox.width/2, elBox.top + elBox.height, 38)
+  @connectionLayer.addNib(@nodeId, elBox.left + elBox.width/2, elBox.top + elBox.height, 30)
 
 
 Node.drawAllConnections = ->

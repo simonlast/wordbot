@@ -1,6 +1,6 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
 (function() {
-  var Create, Drag, setup;
+  var Controller, Create, Drag, setup;
 
   require("./components/loadAll.coffee");
 
@@ -8,17 +8,20 @@
 
   Create = require("./create.coffee");
 
+  Controller = require("./controller.coffee");
+
   setup = function() {
-    var create, drag;
+    var controller, create, drag;
     drag = new Drag();
-    return create = new Create();
+    create = new Create();
+    return controller = new Controller();
   };
 
   $(setup);
 
 }).call(this);
 
-},{"./components/loadAll.coffee":2,"./polyfill.coffee":3,"./create.coffee":4}],3:[function(require,module,exports){
+},{"./components/loadAll.coffee":2,"./polyfill.coffee":3,"./create.coffee":4,"./controller.coffee":5}],3:[function(require,module,exports){
 (function() {
   var Drag,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -102,7 +105,7 @@
     Create.prototype.initListeners_ = function() {
       var $doc;
       $doc = $(document);
-      return $doc.on("dblclick", this.addNewNode_);
+      return $doc.on("dblclick", ".graph", this.addNewNode_);
     };
 
     Create.prototype.addNewNode_ = function(e) {
@@ -129,7 +132,140 @@
 
 }).call(this);
 
-},{"./util.coffee":5}],2:[function(require,module,exports){
+},{"./util.coffee":6}],5:[function(require,module,exports){
+(function() {
+  var Controller, util,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  util = require("./util.coffee");
+
+  Controller = (function() {
+    function Controller() {
+      this.textEntered_ = __bind(this.textEntered_, this);
+      this.nodeContainer = document.querySelector(".node-container");
+      this.conversation = document.querySelector("p-conversation");
+      this.initListeners_();
+    }
+
+    Controller.prototype.initListeners_ = function() {
+      return $(this.conversation).on("enter", this.textEntered_);
+    };
+
+    Controller.prototype.textEntered_ = function(e) {
+      var consumedTokens, value;
+      value = this.conversation.getValue();
+      consumedTokens = this.tryConsume_(this.getTokens_(value));
+      console.log("consumedTokens: ", consumedTokens);
+      if (consumedTokens.length > 0) {
+        return this.conversation.setValue("");
+      }
+    };
+
+    Controller.prototype.tryConsume_ = function(tokens) {
+      var activeNode, all, best, branches, consumed, moreConsumed, rest,
+        _this = this;
+      activeNode = this.getActiveNode_();
+      if (activeNode == null) {
+        return;
+      }
+      branches = this.getConnections_(activeNode);
+      console.log("branches: ", branches);
+      all = _.map(branches, function(branch) {
+        var branchText, branchTokens, isConsumed, numEqual;
+        branchText = branch.getValue();
+        branchTokens = _this.getTokens_(branchText);
+        console.log("compare: ", tokens, branchTokens);
+        numEqual = _this.numEqual_(tokens, branchTokens);
+        isConsumed = numEqual >= branchTokens.length;
+        return {
+          branch: branch,
+          numEqual: numEqual,
+          isConsumed: isConsumed
+        };
+      });
+      best = _.max(all, function(data) {
+        return data.numEqual;
+      });
+      consumed = _.first(tokens, best.numEqual);
+      rest = _.rest(tokens, best.numEqual);
+      if (best.isConsumed) {
+        this.setActiveNode_(best.branch);
+        if (best.numEqual < tokens.length) {
+          moreConsumed = this.tryConsume_(rest);
+          return _.union(consumed, moreConsumed);
+        } else {
+          return consumed;
+        }
+      } else {
+        return [];
+      }
+    };
+
+    Controller.prototype.numEqual_ = function(tokens1, tokens2) {
+      var index, larger, largerToken, num, ordered, smaller, smallerToken, _i, _len;
+      ordered = _.sortBy([tokens1, tokens2], function(tokens) {
+        return tokens.length;
+      });
+      smaller = ordered[0];
+      larger = ordered[1];
+      num = 0;
+      for (index = _i = 0, _len = larger.length; _i < _len; index = ++_i) {
+        largerToken = larger[index];
+        smallerToken = smaller[index];
+        if (largerToken === smallerToken) {
+          num++;
+        } else {
+          return num;
+        }
+      }
+      return num;
+    };
+
+    Controller.prototype.getTokens_ = function(text) {
+      text = text.toLowerCase();
+      return text.split(" ");
+    };
+
+    Controller.prototype.getConnections_ = function(node) {
+      var allConnections, connectedTo, flattened, inputs, outputs, unique,
+        _this = this;
+      connectedTo = node.connectedTo;
+      outputs = _.filter(connectedTo, function(el) {
+        return el.classList.contains("output");
+      });
+      inputs = _.difference(connectedTo, outputs);
+      allConnections = _.map(outputs, function(output) {
+        return _this.getConnections_(output);
+      });
+      allConnections.unshift(inputs);
+      flattened = _.flatten(allConnections);
+      unique = _.uniq(flattened);
+      return unique;
+    };
+
+    Controller.prototype.getActiveNode_ = function() {
+      return this.nodeContainer.querySelector(".active");
+    };
+
+    Controller.prototype.setActiveNode_ = function(node) {
+      var active, el, _i, _len;
+      active = this.nodeContainer.querySelectorAll(".active");
+      for (_i = 0, _len = active.length; _i < _len; _i++) {
+        el = active[_i];
+        el.classList.remove("active");
+      }
+      return node.classList.add("active");
+    };
+
+    return Controller;
+
+  })();
+
+  module.exports = Controller;
+
+}).call(this);
+
+},{"./util.coffee":6}],2:[function(require,module,exports){
 (function() {
   require("./ConnectionLayer.coffee");
 
@@ -139,7 +275,7 @@
 
 }).call(this);
 
-},{"./ConnectionLayer.coffee":6,"./Node.coffee":7,"./Conversation.coffee":8}],5:[function(require,module,exports){
+},{"./ConnectionLayer.coffee":7,"./Node.coffee":8,"./Conversation.coffee":9}],6:[function(require,module,exports){
 (function() {
   var util;
 
@@ -157,7 +293,6 @@
     var $el, box;
     $el = $(el);
     box = $el.offset();
-    console.log(el, box);
     box.width = $el.outerWidth();
     box.height = $el.outerHeight();
     return box;
@@ -173,7 +308,7 @@
 
 }).call(this);
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 (function() {
   var ConnectionLayer, html, util;
 
@@ -219,7 +354,7 @@
   ConnectionLayer.addNib = function(id, x, y, rad) {
     var circle, group;
     if (rad == null) {
-      rad = 30;
+      rad = 20;
     }
     group = this.users[id];
     circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -306,7 +441,7 @@
 
 }).call(this);
 
-},{"../util.coffee":5}],7:[function(require,module,exports){
+},{"../util.coffee":6}],8:[function(require,module,exports){
 (function() {
   var Node, html, util;
 
@@ -314,7 +449,7 @@
 
   Node = Object.create(HTMLElement.prototype);
 
-  html = "<input class=\"node-text\"></input>";
+  html = "<input class=\"node-text\"></input>\n<button class=\"swap-type\">↺</button>";
 
   Node.insertedCallback = function() {
     this.$el = $(this);
@@ -329,6 +464,7 @@
 
   Node.initListeners_ = function() {
     this.$el.on("mousedown", this.mouseDown.bind(this));
+    this.$el.on("click", ".swap-type", this.swapType_.bind(this));
     this.$el.on("p-dragstart", this.dragStart_.bind(this));
     this.$el.on("p-dragmove", this.dragMove_.bind(this));
     this.$el.on("p-dragend", this.dragEnd_.bind(this));
@@ -336,6 +472,14 @@
     this.$layerGroup.on("p-dragstart", this.connectDragStart_.bind(this));
     this.$layerGroup.on("p-dragmove", this.connectDragMove_.bind(this));
     return this.$layerGroup.on("p-dragend", this.connectDragEnd_.bind(this));
+  };
+
+  Node.getValue = function() {
+    return this.querySelector(".node-text").value;
+  };
+
+  Node.swapType_ = function(e) {
+    return this.classList.toggle("output");
   };
 
   /* ===========================================================================
@@ -452,7 +596,7 @@
       this.connectionLayer.addLineEl(this.nodeId, this, other);
     }
     elBox = util.getElOuterBox(this);
-    return this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 38);
+    return this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 30);
   };
 
   Node.drawAllConnections = function() {
@@ -480,7 +624,7 @@
 
 }).call(this);
 
-},{"../util.coffee":5}],8:[function(require,module,exports){
+},{"../util.coffee":6}],9:[function(require,module,exports){
 (function() {
   var Conversation, html, util;
 
@@ -488,7 +632,7 @@
 
   Conversation = Object.create(HTMLElement.prototype);
 
-  html = "";
+  html = "\n<input type=\"text\" class=\"conversation-input\">";
 
   Conversation.insertedCallback = function() {
     this.$el = $(this);
@@ -496,7 +640,26 @@
     return this.initListeners_();
   };
 
-  Conversation.initListeners_ = function() {};
+  Conversation.getValue = function() {
+    return this.querySelector(".conversation-input").value;
+  };
+
+  Conversation.setValue = function(value) {
+    return this.querySelector(".conversation-input").value = value;
+  };
+
+  Conversation.initListeners_ = function() {
+    var input;
+    input = this.querySelector(".conversation-input");
+    $(input).on("input", this.inputTyped_.bind(this));
+    return $(input).on("keydown", this.inputTyped_.bind(this));
+  };
+
+  Conversation.inputTyped_ = function(e) {
+    if (e.keyCode === 13) {
+      return $(this).trigger("enter");
+    }
+  };
 
   document.register("p-conversation", {
     prototype: Conversation
@@ -504,5 +667,5 @@
 
 }).call(this);
 
-},{"../util.coffee":5}]},{},[1])
+},{"../util.coffee":6}]},{},[1])
 ;

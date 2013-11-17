@@ -2,7 +2,7 @@
 @secondary: rgb(219,230,236);
 @connections: rgb(194,203,206);
 @dark: rgb(164,188,194);
-@text: rgb(40,40,40);
+@text: #52737b;
 
 *{
   box-sizing: border-box;
@@ -55,7 +55,7 @@ body{
 	background-color:@bkg;
 	font-family:'Helvetica Light', 'Helvetica';
 	font-weight: lighter;
-	overflow: hidden;
+	overflow: scroll;
 	color:rgb(100,100,100);
 	margin: 0;
 }
@@ -66,16 +66,20 @@ body{
 }
 
 .graph{
-  height: 100%;
+  width: 2000px;
+  height: 2000px;
   position: relative;
   .noselect;
+  overflow: scroll;
 }
 
 .conversation{
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 300px;
   height: 100%;
 }
-
-
 
 .node-container{
   position: absolute;
@@ -123,23 +127,28 @@ p-connection-layer circle{
 p-node{
   pointer-events: auto;
   background-color: @dark;
-  width: 240px;
+  width: 200px;
   position: absolute;
   cursor: -webkit-grab;
   .noselect;
-  padding: 18px;
+  padding: 16px;
   border-radius: 6px;
   .ease(100ms, box-shadow);
+  .ease(100ms, background-color);
 }
 
 .active{
   box-shadow: 0 0 24px @dark;
 }
 
+.output{
+  background-color: rgb(216,113,92);
+}
+
 p-node .node-text{
   text-align: center;
   width: 100%;
-  font-size: 24px;
+  font-size: 16px;
   margin: 0;
   padding: 4px;
   background-color: @secondary;
@@ -152,6 +161,18 @@ p-node .node-text{
   font-weight: 100;
 }
 
+p-node .swap-type{
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background: none;
+  border: none;
+  outline: none;
+  color: @secondary;
+  font-size: 14px;
+  cursor: pointer;
+}
+
 
 p-conversation{
   position: absolute;
@@ -160,6 +181,22 @@ p-conversation{
   width: 100%;
   height: 100%;
   background-color: @dark;
+}
+
+p-conversation .conversation-input{
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  font-size: 24px;
+  margin: 0;
+  padding: 6px;
+  background-color: @secondary;
+  color: @text;
+  border: none;
+  outline: none;
+  font-family: Helvetica;
+  font-weight: 100;
 }
 
 

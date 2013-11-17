@@ -11,7 +11,7 @@ class Create
 
   initListeners_: ->
     $doc = $(document)
-    $doc.on("dblclick", @addNewNode_)
+    $doc.on("dblclick", ".graph", @addNewNode_)
 
 
   addNewNode_: (e) =>

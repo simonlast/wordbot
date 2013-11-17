@@ -12,6 +12,7 @@ class Controller
   initListeners_: ->
     $(@conversation).on("enter", @textEntered_)
     $(document).on("mousedown", "p-node", @selectNode_)
+    $(document).on("input", "p-node", @selectNode_)
 
 
   selectNode_: (e) =>

@@ -196,7 +196,8 @@
 
     Controller.prototype.initListeners_ = function() {
       $(this.conversation).on("enter", this.textEntered_);
-      return $(document).on("mousedown", "p-node", this.selectNode_);
+      $(document).on("mousedown", "p-node", this.selectNode_);
+      return $(document).on("input", "p-node", this.selectNode_);
     };
 
     Controller.prototype.selectNode_ = function(e) {
@@ -493,6 +494,7 @@
   Node.insertedCallback = function() {
     this.$el = $(this);
     this.innerHTML = html;
+    this.querySelector(".node-text").select();
     this.connectionLayer = document.querySelector("p-connection-layer");
     this.nodeId = this.getAttribute("node-id");
     this.layerGroup = this.connectionLayer.registerUser(this.nodeId);

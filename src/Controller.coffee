@@ -29,6 +29,9 @@ class Controller
     consumedNodes = @getConsumedNodes_([activeNode], tokens)
     console.log consumedNodes
 
+    # Ignore the first node
+    consumedNodes.splice(0,1)
+
     @setPotentialNodes_(consumedNodes)
 
 
@@ -38,8 +41,11 @@ class Controller
     activeNode = @getActiveNode_()
     consumedNodes = @getConsumedNodes_([activeNode], tokens)
 
+    # Ignore the first node
+    consumedNodes.splice(0,1)
+
     if consumedNodes.length > 0
-      @setActiveNode_(consumedNodes[consumedNodes.length-1])
+      @setActiveNode_(consumedNodes[consumedNodes.length-1], false)
       @setPotentialNodes_([])
       for node in consumedNodes
         if node.classList.contains("output")
@@ -147,14 +153,14 @@ class Controller
 
 
 
-  setActiveNode_: (node) ->
+  setActiveNode_: (node, appendToLog = true) ->
     active = @nodeContainer.querySelectorAll(".active")
     for el in active
       el.deselectNode()
 
     node.selectNode()
 
-    if node.classList.contains("output")
+    if appendToLog and node.classList.contains("output")
       @conversation.addOutput(node.getValue())
 
 
@@ -162,7 +168,7 @@ class Controller
     outputs = @getConnectedOutputs_(node)
 
     if outputs.length > 0
-      @setActiveNode_(outputs[0])
+      @setActiveNode_(outputs[0], appendToLog)
 
 
 

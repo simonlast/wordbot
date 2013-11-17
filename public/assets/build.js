@@ -199,6 +199,7 @@
       activeNode = this.getActiveNode_();
       consumedNodes = this.getConsumedNodes_([activeNode], tokens);
       console.log(consumedNodes);
+      consumedNodes.splice(0, 1);
       return this.setPotentialNodes_(consumedNodes);
     };
 
@@ -208,8 +209,9 @@
       tokens = this.getTokens_(value);
       activeNode = this.getActiveNode_();
       consumedNodes = this.getConsumedNodes_([activeNode], tokens);
+      consumedNodes.splice(0, 1);
       if (consumedNodes.length > 0) {
-        this.setActiveNode_(consumedNodes[consumedNodes.length - 1]);
+        this.setActiveNode_(consumedNodes[consumedNodes.length - 1], false);
         this.setPotentialNodes_([]);
         _results = [];
         for (_i = 0, _len = consumedNodes.length; _i < _len; _i++) {
@@ -327,20 +329,23 @@
       return _results;
     };
 
-    Controller.prototype.setActiveNode_ = function(node) {
+    Controller.prototype.setActiveNode_ = function(node, appendToLog) {
       var active, el, outputs, _i, _len;
+      if (appendToLog == null) {
+        appendToLog = true;
+      }
       active = this.nodeContainer.querySelectorAll(".active");
       for (_i = 0, _len = active.length; _i < _len; _i++) {
         el = active[_i];
         el.deselectNode();
       }
       node.selectNode();
-      if (node.classList.contains("output")) {
+      if (appendToLog && node.classList.contains("output")) {
         this.conversation.addOutput(node.getValue());
       }
       outputs = this.getConnectedOutputs_(node);
       if (outputs.length > 0) {
-        return this.setActiveNode_(outputs[0]);
+        return this.setActiveNode_(outputs[0], appendToLog);
       }
     };
 

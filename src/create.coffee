@@ -20,7 +20,7 @@ class Create
 
     if not closestNode?
       node = document.createElement("p-node")
-      node.setAttribute("node-id", Math.floor(Math.random()*1e20))
+      node.setAttribute("node-id", uuid())
       @nodeContainer.appendChild(node)
       box = util.getElOuterBox(node)
 

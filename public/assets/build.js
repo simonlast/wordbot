@@ -153,7 +153,7 @@
       closestNode = $target.closest("p-node")[0];
       if (closestNode == null) {
         node = document.createElement("p-node");
-        node.setAttribute("node-id", Math.floor(Math.random() * 1e20));
+        node.setAttribute("node-id", uuid());
         this.nodeContainer.appendChild(node);
         box = util.getElOuterBox(node);
         return $(node).css({
@@ -373,7 +373,13 @@
     };
 
     Persist.prototype.getPersisUrl_ = function() {
-      return urlRegex.exec(window.location.search)[1];
+      var matches;
+      matches = urlRegex.exec(window.location.search);
+      if (matches == null) {
+        return window.location.href = "/?" + uuid();
+      } else {
+        return matches[1];
+      }
     };
 
     Persist.prototype.persistAll_ = function(e) {

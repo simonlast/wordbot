@@ -42,7 +42,11 @@ class Persist
 
 
   getPersisUrl_: ->
-    return urlRegex.exec(window.location.search)[1]
+    matches = urlRegex.exec(window.location.search)
+    if not matches?
+      window.location.href = "/?" + uuid()
+    else
+      return matches[1]
 
 
   persistAll_: (e) =>

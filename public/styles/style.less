@@ -139,14 +139,17 @@ p-node{
   border-radius: 6px;
   .ease(100ms, box-shadow);
   .ease(100ms, background-color);
+  .ease(100ms, -webkit-transform);
 }
 
 p-node.active{
-  box-shadow: 0 0 48px rgb(100, 100, 100);
+  box-shadow: 0 0 24px rgb(100, 100, 100);
+  .scale(1.05);
 }
 
 p-node.potentialActive{
   box-shadow: 0 0 24px rgb(100, 100, 100);
+  .scale(1.05);
 }
 
 p-node.output{

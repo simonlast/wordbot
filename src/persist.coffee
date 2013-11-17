@@ -1,3 +1,4 @@
+Controller = require("./Controller.coffee")
 db = require("./db.coffee")
 
 observerOpts = {
@@ -99,6 +100,8 @@ class Persist
       node.setAttribute("node-id", nodeData.id)
       if nodeData.type is "output"
         node.classList.add("output")
+      if nodeData.active
+        node.classList.add("active")
       @nodeContainer.appendChild(node)
 
       $(node).css({
@@ -124,9 +127,14 @@ class Persist
 
     @nodeContainer.querySelector("p-node").drawAllConnections()
 
+    # If there is an active node, set it.
+    activeNode = @nodeContainer.querySelector(".active")
+    if activeNode?
+      Controller.setActiveNode_(activeNode)
+
 
   findNode_: (id) ->
     return @nodeContainer.querySelector("[node-id='#{id}']")
 
 
-module.exports = Persist
+module.exports = new Persist()

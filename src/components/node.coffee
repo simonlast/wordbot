@@ -86,7 +86,7 @@ Node.serialize = ->
       left: box.left
       top: box.top
     }
-
+    active: @classList.contains("active")
   }
 
 
@@ -96,6 +96,14 @@ Node.selectNode = ->
 
 Node.deselectNode = ->
   @classList.remove("active")
+
+
+Node.selectPotentialNode = ->
+  @classList.add("potentialActive")
+
+
+Node.deselectPotentialNode = ->
+  @classList.remove("potentialActive")
 
 
 Node.drawConnections = ->

@@ -1,32 +1,23 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
 (function() {
-  var Controller, Create, Drag, Persist, setup;
+  var setup;
 
   require("./db.coffee");
 
   require("./components/loadAll.coffee");
 
-  Drag = require("./polyfill.coffee");
-
-  Create = require("./create.coffee");
-
-  Controller = require("./controller.coffee");
-
-  Persist = require("./persist.coffee");
-
   setup = function() {
-    var controller, create, drag, persist;
-    drag = new Drag();
-    create = new Create();
-    controller = new Controller();
-    return persist = new Persist();
+    require("./polyfill.coffee");
+    require("./create.coffee");
+    require("./Controller.coffee");
+    return require("./persist.coffee");
   };
 
   window.addEventListener('WebComponentsReady', setup);
 
 }).call(this);
 
-},{"./db.coffee":2,"./components/loadAll.coffee":3,"./polyfill.coffee":4,"./create.coffee":5,"./controller.coffee":6,"./persist.coffee":7}],2:[function(require,module,exports){
+},{"./db.coffee":2,"./components/loadAll.coffee":3,"./polyfill.coffee":4,"./create.coffee":5,"./Controller.coffee":6,"./persist.coffee":7}],2:[function(require,module,exports){
 (function() {
   var db, socket;
 
@@ -123,7 +114,7 @@
 
   })();
 
-  module.exports = Drag;
+  module.exports = new Drag();
 
 }).call(this);
 
@@ -326,12 +317,12 @@
       potentialActive = this.nodeContainer.querySelectorAll(".potentialActive");
       for (_i = 0, _len = potentialActive.length; _i < _len; _i++) {
         node = potentialActive[_i];
-        node.classList.remove("potentialActive");
+        node.deselectPotentialNode();
       }
       _results = [];
       for (_j = 0, _len1 = nodes.length; _j < _len1; _j++) {
         node = nodes[_j];
-        _results.push(node.classList.add("potentialActive"));
+        _results.push(node.selectPotentialNode());
       }
       return _results;
     };
@@ -357,14 +348,16 @@
 
   })();
 
-  module.exports = Controller;
+  module.exports = new Controller();
 
 }).call(this);
 
 },{"./util.coffee":8}],7:[function(require,module,exports){
 (function() {
-  var Persist, db, observerOpts, persistWait, urlRegex,
+  var Controller, Persist, db, observerOpts, persistWait, urlRegex,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  Controller = require("./Controller.coffee");
 
   db = require("./db.coffee");
 
@@ -464,7 +457,7 @@
     };
 
     Persist.prototype.renderData_ = function(nodes) {
-      var id, node, nodeData, other, _i, _j, _k, _len, _len1, _len2, _ref;
+      var activeNode, id, node, nodeData, other, _i, _j, _k, _len, _len1, _len2, _ref;
       this.dataRendered = true;
       if ((nodes == null) || (nodes.length === 0)) {
         return;
@@ -475,6 +468,9 @@
         node.setAttribute("node-id", nodeData.id);
         if (nodeData.type === "output") {
           node.classList.add("output");
+        }
+        if (nodeData.active) {
+          node.classList.add("active");
         }
         this.nodeContainer.appendChild(node);
         $(node).css({
@@ -496,7 +492,11 @@
           }
         }
       }
-      return this.nodeContainer.querySelector("p-node").drawAllConnections();
+      this.nodeContainer.querySelector("p-node").drawAllConnections();
+      activeNode = this.nodeContainer.querySelector(".active");
+      if (activeNode != null) {
+        return Controller.setActiveNode_(activeNode);
+      }
     };
 
     Persist.prototype.findNode_ = function(id) {
@@ -507,11 +507,11 @@
 
   })();
 
-  module.exports = Persist;
+  module.exports = new Persist();
 
 }).call(this);
 
-},{"./db.coffee":2}],3:[function(require,module,exports){
+},{"./Controller.coffee":6,"./db.coffee":2}],3:[function(require,module,exports){
 (function() {
   require("./ConnectionLayer.coffee");
 
@@ -735,7 +735,8 @@
       position: {
         left: box.left,
         top: box.top
-      }
+      },
+      active: this.classList.contains("active")
     };
   };
 
@@ -745,6 +746,14 @@
 
   Node.deselectNode = function() {
     return this.classList.remove("active");
+  };
+
+  Node.selectPotentialNode = function() {
+    return this.classList.add("potentialActive");
+  };
+
+  Node.deselectPotentialNode = function() {
+    return this.classList.remove("potentialActive");
   };
 
   Node.drawConnections = function() {

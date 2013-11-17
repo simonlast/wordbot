@@ -140,10 +140,10 @@ class Controller
     potentialActive = @nodeContainer.querySelectorAll(".potentialActive")
 
     for node in potentialActive
-      node.classList.remove("potentialActive")
+      node.deselectPotentialNode()
 
     for node in nodes
-      node.classList.add("potentialActive")
+      node.selectPotentialNode()
 
 
 
@@ -167,4 +167,4 @@ class Controller
 
 
 
-module.exports = Controller
+module.exports = new Controller()

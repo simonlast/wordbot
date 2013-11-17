@@ -48,4 +48,4 @@ class Drag
     $(target).trigger(newEvent)
 
 
-module.exports = Drag
+module.exports = new Drag()

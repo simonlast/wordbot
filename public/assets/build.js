@@ -2,6 +2,8 @@
 (function() {
   var Controller, Create, Drag, Persist, setup;
 
+  require("./db.coffee");
+
   require("./components/loadAll.coffee");
 
   Drag = require("./polyfill.coffee");
@@ -24,7 +26,40 @@
 
 }).call(this);
 
-},{"./components/loadAll.coffee":2,"./polyfill.coffee":3,"./create.coffee":4,"./controller.coffee":5,"./persist.coffee":6}],3:[function(require,module,exports){
+},{"./db.coffee":2,"./components/loadAll.coffee":3,"./polyfill.coffee":4,"./create.coffee":5,"./controller.coffee":6,"./persist.coffee":7}],2:[function(require,module,exports){
+(function() {
+  var db, socket;
+
+  db = {};
+
+  socket = io.connect(window.location.href);
+
+  db.get = function(id, callback) {
+    var query;
+    query = {
+      id: id
+    };
+    return socket.emit("get", query, function(data) {
+      return callback(data);
+    });
+  };
+
+  db.set = function(id, data, callback) {
+    var query;
+    query = {
+      id: id,
+      data: data
+    };
+    return socket.emit("set", query, function(data) {
+      return callback(data);
+    });
+  };
+
+  module.exports = db;
+
+}).call(this);
+
+},{}],4:[function(require,module,exports){
 (function() {
   var Drag,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -92,49 +127,7 @@
 
 }).call(this);
 
-},{}],6:[function(require,module,exports){
-(function() {
-  var Persist,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  Persist = (function() {
-    function Persist() {
-      this.persistAll_ = __bind(this.persistAll_, this);
-      this.persistAllNext_ = __bind(this.persistAllNext_, this);
-      this.nodeContainer = document.querySelector(".node-container");
-      this.lastData = null;
-    }
-
-    Persist.prototype.persistAllNext_ = function(e) {
-      return setTimeout(this.persistAll_, 0);
-    };
-
-    Persist.prototype.persistAll_ = function(e) {
-      var data;
-      data = this.serializeAll_();
-      if (!_.isEqual(data, this.lastData)) {
-        return this.lastData = data;
-      }
-    };
-
-    Persist.prototype.serializeAll_ = function() {
-      var all, nodes;
-      nodes = $(this.nodeContainer).children();
-      all = _.map(nodes, function(node) {
-        return node.serialize();
-      });
-      return all;
-    };
-
-    return Persist;
-
-  })();
-
-  module.exports = Persist;
-
-}).call(this);
-
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 (function() {
   var Create, util,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -178,7 +171,7 @@
 
 }).call(this);
 
-},{"./util.coffee":7}],5:[function(require,module,exports){
+},{"./util.coffee":8}],6:[function(require,module,exports){
 (function() {
   var Controller, util,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -329,7 +322,165 @@
 
 }).call(this);
 
-},{"./util.coffee":7}],2:[function(require,module,exports){
+},{"./util.coffee":8}],7:[function(require,module,exports){
+(function() {
+  var Persist, db, observerOpts, persistWait, urlRegex,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  db = require("./db.coffee");
+
+  observerOpts = {
+    attributes: true,
+    characterData: true,
+    childList: true,
+    subtree: true
+  };
+
+  persistWait = 1000;
+
+  urlRegex = /\?(.*)/;
+
+  Persist = (function() {
+    function Persist() {
+      this.persistAll_ = __bind(this.persistAll_, this);
+      this.persistAllNext_ = __bind(this.persistAllNext_, this);
+      this.graph = document.querySelector(".graph");
+      this.nodeContainer = document.querySelector(".node-container");
+      this.lastData = null;
+      this.dataRendered = false;
+      this.initListeners_();
+      this.loadData_();
+    }
+
+    /* ===========================================================================
+    
+      Persisting data
+    
+    ===========================================================================
+    */
+
+
+    Persist.prototype.initListeners_ = function() {
+      var callback, observer;
+      callback = _.throttle(this.persistAll_, persistWait);
+      observer = new MutationObserver(callback);
+      observer.observe(this.graph, observerOpts);
+      return $(document).on("input", ".node-text", callback);
+    };
+
+    Persist.prototype.persistAllNext_ = function(e) {
+      return setTimeout(this.persistAll_, 0);
+    };
+
+    Persist.prototype.getPersisUrl_ = function() {
+      return urlRegex.exec(window.location.search)[1];
+    };
+
+    Persist.prototype.persistAll_ = function(e) {
+      var data, url;
+      if (!this.dataRendered) {
+        return;
+      }
+      data = this.serializeAll_();
+      if (!_.isEqual(data, this.lastData)) {
+        this.lastData = data;
+        console.log("newData");
+        url = this.getPersisUrl_();
+        if (url != null) {
+          return db.set(url, data, function(data) {
+            if (data.err != null) {
+              return console.log(data.err);
+            }
+          });
+        }
+      }
+    };
+
+    Persist.prototype.serializeAll_ = function() {
+      var all, nodes;
+      nodes = $(this.nodeContainer).children();
+      all = _.map(nodes, function(node) {
+        return node.serialize();
+      });
+      return all;
+    };
+
+    /* ===========================================================================
+    
+      Loading data
+    
+    ===========================================================================
+    */
+
+
+    Persist.prototype.loadData_ = function() {
+      var url,
+        _this = this;
+      url = this.getPersisUrl_();
+      if (url != null) {
+        return db.get(url, function(data) {
+          if (data.err != null) {
+            return _this.dataRendered = true;
+          } else {
+            return _this.renderData_(data.value);
+          }
+        });
+      }
+    };
+
+    Persist.prototype.renderData_ = function(nodes) {
+      var node, nodeData, redraw, _i, _len,
+        _this = this;
+      this.dataRendered = true;
+      if ((nodes == null) || (nodes.length === 0)) {
+        return;
+      }
+      for (_i = 0, _len = nodes.length; _i < _len; _i++) {
+        nodeData = nodes[_i];
+        node = document.createElement("p-node");
+        node.setAttribute("node-id", nodeData.id);
+        if (nodeData.type === "output") {
+          node.classList.add("output");
+        }
+        this.nodeContainer.appendChild(node);
+        $(node).css({
+          left: nodeData.position.left + "px",
+          top: nodeData.position.top + "px"
+        });
+      }
+      redraw = function() {
+        var id, other, _j, _k, _len1, _len2, _ref;
+        for (_j = 0, _len1 = nodes.length; _j < _len1; _j++) {
+          nodeData = nodes[_j];
+          node = _this.findNode_(nodeData.id);
+          node.setValue(nodeData.text);
+          _ref = nodeData.connectedTo;
+          for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
+            id = _ref[_k];
+            other = _this.findNode_(id);
+            if (other != null) {
+              node.connectTo(other);
+            }
+          }
+        }
+        return _this.nodeContainer.querySelector("p-node").drawAllConnections();
+      };
+      return setTimeout(redraw, 0);
+    };
+
+    Persist.prototype.findNode_ = function(id) {
+      return this.nodeContainer.querySelector("[node-id='" + id + "']");
+    };
+
+    return Persist;
+
+  })();
+
+  module.exports = Persist;
+
+}).call(this);
+
+},{"./db.coffee":2}],3:[function(require,module,exports){
 (function() {
   require("./ConnectionLayer.coffee");
 
@@ -339,7 +490,7 @@
 
 }).call(this);
 
-},{"./ConnectionLayer.coffee":8,"./Node.coffee":9,"./Conversation.coffee":10}],7:[function(require,module,exports){
+},{"./ConnectionLayer.coffee":9,"./Node.coffee":10,"./Conversation.coffee":11}],8:[function(require,module,exports){
 (function() {
   var util;
 
@@ -372,7 +523,7 @@
 
 }).call(this);
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function() {
   var ConnectionLayer, html, util;
 
@@ -473,7 +624,7 @@
 
 }).call(this);
 
-},{"../util.coffee":7}],9:[function(require,module,exports){
+},{"../util.coffee":8}],10:[function(require,module,exports){
 (function() {
   var Node, html, util;
 
@@ -481,7 +632,7 @@
 
   Node = Object.create(HTMLElement.prototype);
 
-  html = "<input class=\"node-text\">\n<button class=\"swap-type\">↺</button>";
+  html = "<input class=\"node-text\" placeholder=\"Type something\">\n<button class=\"swap-type\">↺</button>";
 
   /* ===========================================================================
   
@@ -527,12 +678,16 @@
     return this.querySelector(".node-text").value;
   };
 
+  Node.setValue = function(value) {
+    return this.querySelector(".node-text").value = value;
+  };
+
   Node.swapType_ = function(e) {
     return this.classList.toggle("output");
   };
 
   Node.serialize = function() {
-    var connectedToIds, type;
+    var box, connectedToIds, type;
     connectedToIds = _.map(this.connectedTo, function(node) {
       return node.getAttribute("node-id");
     });
@@ -540,10 +695,16 @@
     if (this.classList.contains("output")) {
       type = "output";
     }
+    box = util.getElOuterBox(this);
     return {
       id: this.getAttribute("node-id"),
       type: type,
-      connectedTo: connectedToIds
+      connectedTo: connectedToIds,
+      text: this.getValue(),
+      position: {
+        left: box.left,
+        top: box.top
+      }
     };
   };
 
@@ -682,7 +843,7 @@
 
 }).call(this);
 
-},{"../util.coffee":7}],10:[function(require,module,exports){
+},{"../util.coffee":8}],11:[function(require,module,exports){
 (function() {
   var Conversation, html, util;
 
@@ -749,5 +910,5 @@
 
 }).call(this);
 
-},{"../util.coffee":7}]},{},[1])
+},{"../util.coffee":8}]},{},[1])
 ;

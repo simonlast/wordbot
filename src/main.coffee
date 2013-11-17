@@ -1,3 +1,4 @@
+require("./db.coffee")
 require("./components/loadAll.coffee")
 Drag = require("./polyfill.coffee")
 Create = require("./create.coffee")

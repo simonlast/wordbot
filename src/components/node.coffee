@@ -3,10 +3,9 @@ util = require("../util.coffee")
 Node = Object.create(HTMLElement.prototype)
 
 html = """
-  <input class="node-text">
+  <input class="node-text" placeholder="Type something">
   <button class="swap-type">↺</button>
 """
-
 
 
 ### ===========================================================================
@@ -60,10 +59,12 @@ Node.getValue = ->
   @querySelector(".node-text").value
 
 
+Node.setValue = (value) ->
+  @querySelector(".node-text").value = value
+
 
 Node.swapType_ = (e) ->
   @classList.toggle("output")
-
 
 
 Node.serialize = ->
@@ -74,10 +75,18 @@ Node.serialize = ->
   if @classList.contains("output")
     type = "output"
 
+  box = util.getElOuterBox(this)
+
   return {
     id: @getAttribute("node-id")
     type: type
     connectedTo: connectedToIds
+    text: @getValue()
+    position: {
+      left: box.left
+      top: box.top
+    }
+
   }
 
 

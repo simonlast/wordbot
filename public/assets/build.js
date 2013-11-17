@@ -159,7 +159,7 @@
 
   })();
 
-  module.exports = Create;
+  module.exports = new Create();
 
 }).call(this);
 
@@ -665,7 +665,7 @@
 
   Node = Object.create(HTMLElement.prototype);
 
-  html = "<input class=\"node-text\" placeholder=\"Type something\">\n<button class=\"swap-type\">↺</button>";
+  html = "<input class=\"node-text\" placeholder=\"Type something\">\n<button class=\"swap-type\">↺</button>\n<button class=\"remove\">×</button>";
 
   /* ===========================================================================
   
@@ -690,6 +690,7 @@
   Node.initListeners_ = function() {
     this.$el.on("mousedown", this.mouseDown_.bind(this));
     this.$el.on("click", ".swap-type", this.swapType_.bind(this));
+    this.$el.on("click", ".remove", this.removeNode.bind(this));
     this.$el.on("p-dragstart", this.dragStart_.bind(this));
     this.$el.on("p-dragmove", this.dragMove_.bind(this));
     this.$el.on("p-dragend", this.dragEnd_.bind(this));
@@ -787,6 +788,18 @@
 
   Node.disconnectFrom = function(other) {
     return this.connectedTo = _.without(this.connectedTo, other);
+  };
+
+  Node.removeNode = function() {
+    var all, node, _i, _len;
+    all = document.querySelectorAll("p-node");
+    for (_i = 0, _len = all.length; _i < _len; _i++) {
+      node = all[_i];
+      node.disconnectFrom(this);
+    }
+    $(this).remove();
+    this.connectionLayer.clear(this.nodeId);
+    return this.drawAllConnections();
   };
 
   /* ===========================================================================

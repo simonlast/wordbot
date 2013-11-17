@@ -5,6 +5,7 @@ Node = Object.create(HTMLElement.prototype)
 html = """
   <input class="node-text" placeholder="Type something">
   <button class="swap-type">↺</button>
+  <button class="remove">×</button>
 """
 
 
@@ -36,6 +37,7 @@ Node.initListeners_ = ->
   @$el.on("mousedown", @mouseDown_.bind(this))
 
   @$el.on("click", ".swap-type", @swapType_.bind(this))
+  @$el.on("click", ".remove", @removeNode.bind(this))
 
   @$el.on("p-dragstart", @dragStart_.bind(this))
   @$el.on("p-dragmove", @dragMove_.bind(this))
@@ -128,6 +130,15 @@ Node.connectTo = (other) ->
 Node.disconnectFrom = (other) ->
   @connectedTo = _.without(@connectedTo, other)
 
+
+Node.removeNode = ->
+  all = document.querySelectorAll("p-node")
+  for node in all
+    node.disconnectFrom(this)
+
+  $(this).remove()
+  @connectionLayer.clear(@nodeId)
+  @drawAllConnections()
 
 
 ### ===========================================================================

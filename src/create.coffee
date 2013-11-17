@@ -32,4 +32,4 @@ class Create
       node.setup()
 
 
-module.exports = Create
+module.exports = new Create()

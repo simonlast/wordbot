@@ -24,8 +24,6 @@ class Controller
     tokens = @getTokens_(value)
     consumedTokens = @tryConsume_(tokens)
     console.log "consumedTokens: ", consumedTokens
-    if consumedTokens.length > 0
-      @conversation.addInput()
 
 
   # Returns tokens left
@@ -66,8 +64,17 @@ class Controller
       # A node was consumed.
       if (bestInputData.isConsumed)
         @setActiveNode_(bestInputData.input)
+
+        reduce = (text, curr) ->
+          text += curr
+
+        inputText = _.reduce(consumed, reduce, "")
+
+        @conversation.addInput(inputText)
+
         moreConsumed = @tryConsume_(rest)
         return _.union(consumed, moreConsumed)
+
 
       # Otherwise, nothing was consumed.
       else
@@ -83,7 +90,6 @@ class Controller
     num = 0
 
     for largerToken, index in larger
-
       smallerToken = smaller[index]
 
       if largerToken is smallerToken
@@ -101,7 +107,6 @@ class Controller
 
   getConnectedOutputs_: (node) ->
     connectedTo = node.connectedTo
-
     outputs = _.filter connectedTo, (el) ->
       return el.classList.contains("output")
 
@@ -110,7 +115,6 @@ class Controller
 
   getConnectedInputs_: (node) ->
     connectedTo = node.connectedTo
-
     inputs = _.filter connectedTo, (el) ->
       return not el.classList.contains("output")
 
@@ -132,8 +136,6 @@ class Controller
 
     if node.classList.contains("output")
       @conversation.addOutput(node.getValue())
-
-
 
 
 module.exports = Controller

@@ -17,12 +17,10 @@ Conversation.getValue = ->
   return @querySelector(".conversation-input").value
 
 
-
-Conversation.addInput = ->
+Conversation.addInput = (text) ->
   input = @querySelector(".conversation-input")
-  value = input.value
   input.value = ""
-  @addMessage(value, "input")
+  @addMessage(text, "input")
 
 
 Conversation.addOutput = (text) ->
@@ -36,18 +34,15 @@ Conversation.addMessage = (text, type) ->
   @querySelector(".log").appendChild(p)
 
 
-
 Conversation.initListeners_ = ->
   input = @querySelector(".conversation-input")
   $(input).on("input", @inputTyped_.bind(this))
   $(input).on("keydown", @inputTyped_.bind(this))
 
 
-
 Conversation.inputTyped_ = (e) ->
   if e.keyCode is 13
     $(this).trigger("enter")
-
 
 
 document.register("p-conversation", {

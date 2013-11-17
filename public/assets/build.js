@@ -162,14 +162,11 @@
       value = this.conversation.getValue();
       tokens = this.getTokens_(value);
       consumedTokens = this.tryConsume_(tokens);
-      console.log("consumedTokens: ", consumedTokens);
-      if (consumedTokens.length > 0) {
-        return this.conversation.addInput();
-      }
+      return console.log("consumedTokens: ", consumedTokens);
     };
 
     Controller.prototype.tryConsume_ = function(tokens) {
-      var activeNode, bestInputData, consumeData, consumed, inputs, moreConsumed, outputs, rest,
+      var activeNode, bestInputData, consumeData, consumed, inputText, inputs, moreConsumed, outputs, reduce, rest,
         _this = this;
       activeNode = this.getActiveNode_();
       if (activeNode == null) {
@@ -203,6 +200,11 @@
         rest = _.rest(tokens, bestInputData.numEqual);
         if (bestInputData.isConsumed) {
           this.setActiveNode_(bestInputData.input);
+          reduce = function(text, curr) {
+            return text += curr;
+          };
+          inputText = _.reduce(consumed, reduce, "");
+          this.conversation.addInput(inputText);
           moreConsumed = this.tryConsume_(rest);
           return _.union(consumed, moreConsumed);
         } else {
@@ -645,12 +647,11 @@
     return this.querySelector(".conversation-input").value;
   };
 
-  Conversation.addInput = function() {
-    var input, value;
+  Conversation.addInput = function(text) {
+    var input;
     input = this.querySelector(".conversation-input");
-    value = input.value;
     input.value = "";
-    return this.addMessage(value, "input");
+    return this.addMessage(text, "input");
   };
 
   Conversation.addOutput = function(text) {

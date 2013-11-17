@@ -151,10 +151,15 @@ p-conversation .conversation-input {
   font-family: Helvetica;
   font-weight: 100;
 }
+p-conversation .log {
+  height: 100%;
+  overflow: scroll;
+}
 p-conversation .log p {
   margin: 8px;
   padding: 8px;
   border-radius: 8px;
+  min-height: 34px;
 }
 p-conversation .log .input {
   background-color: #dbe6ec;

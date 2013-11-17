@@ -173,30 +173,30 @@ p-conversation .log p {
   border-radius: 8px;
   min-height: 34px;
 }
-/* creates triangle */
-p-conversation .log p:after {
-  content: "";
-  position: absolute;
-  border-style: solid;
-  display: block;
-}
 p-conversation .log .output {
   background-color: #d8715c;
   color: #dbe6ec;
   margin-right: 40%;
   margin-left: 24px;
 }
-p-conversation .log .output:after {
-  left: -11px;
-  bottom: 6px;
-  border-width: 8px 12px 8px 0;
-  border-color: transparent #d8715c;
-}
 p-conversation .log .input {
   background-color: #dbe6ec;
   text-align: right;
   margin-left: 40%;
   margin-right: 24px;
+}
+/* Triangles */
+p-conversation .log p:after {
+  content: "";
+  position: absolute;
+  border-style: solid;
+  display: block;
+}
+p-conversation .log .output:after {
+  left: -11px;
+  bottom: 6px;
+  border-width: 8px 12px 8px 0;
+  border-color: transparent #d8715c;
 }
 p-conversation .log .input:after {
   right: -11px;

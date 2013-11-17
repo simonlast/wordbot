@@ -1,6 +1,6 @@
 db = {}
 
-socket = io.connect(window.location.href)
+socket = io.connect(window.location.origin)
 
 db.get = (id, callback) ->
   query = {id}

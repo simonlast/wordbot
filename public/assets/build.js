@@ -22,7 +22,7 @@
     return persist = new Persist();
   };
 
-  $(setup);
+  window.addEventListener('WebComponentsReady', setup);
 
 }).call(this);
 
@@ -32,7 +32,7 @@
 
   db = {};
 
-  socket = io.connect(window.location.href);
+  socket = io.connect(window.location.origin);
 
   db.get = function(id, callback) {
     var query;
@@ -156,10 +156,11 @@
         node.setAttribute("node-id", uuid());
         this.nodeContainer.appendChild(node);
         box = util.getElOuterBox(node);
-        return $(node).css({
+        $(node).css({
           left: (e.pageX - box.width / 2) + "px",
           top: (e.pageY - box.height / 2) + "px"
         });
+        return node.setup();
       }
     };
 
@@ -336,9 +337,9 @@
     subtree: true
   };
 
-  persistWait = 1000;
+  persistWait = 100;
 
-  urlRegex = /\?(.*)/;
+  urlRegex = /\/(.*)/;
 
   Persist = (function() {
     function Persist() {
@@ -374,12 +375,8 @@
 
     Persist.prototype.getPersisUrl_ = function() {
       var matches;
-      matches = urlRegex.exec(window.location.search);
-      if (matches == null) {
-        return window.location.href = "/?" + uuid();
-      } else {
-        return matches[1];
-      }
+      matches = urlRegex.exec(window.location.pathname);
+      return matches[1];
     };
 
     Persist.prototype.persistAll_ = function(e) {
@@ -390,7 +387,7 @@
       data = this.serializeAll_();
       if (!_.isEqual(data, this.lastData)) {
         this.lastData = data;
-        console.log("newData");
+        console.log("saving data");
         url = this.getPersisUrl_();
         if (url != null) {
           return db.set(url, data, function(data) {
@@ -420,24 +417,17 @@
 
 
     Persist.prototype.loadData_ = function() {
-      var url,
-        _this = this;
-      url = this.getPersisUrl_();
-      if (url != null) {
-        return db.get(url, function(data) {
-          if (data.err != null) {
-            return _this.dataRendered = true;
-          } else {
-            return _this.renderData_(data.value);
-          }
-        });
+      var data;
+      data = window.bootstrapData;
+      if (data != null) {
+        return this.renderData_(data);
+      } else {
+        return this.dataRendered = true;
       }
     };
 
     Persist.prototype.renderData_ = function(nodes) {
-      var node, nodeData, redraw, _i, _len,
-        _this = this;
-      this.dataRendered = true;
+      var id, node, nodeData, other, _i, _j, _k, _len, _len1, _len2, _ref;
       if ((nodes == null) || (nodes.length === 0)) {
         return;
       }
@@ -453,25 +443,23 @@
           left: nodeData.position.left + "px",
           top: nodeData.position.top + "px"
         });
+        node.setup();
       }
-      redraw = function() {
-        var id, other, _j, _k, _len1, _len2, _ref;
-        for (_j = 0, _len1 = nodes.length; _j < _len1; _j++) {
-          nodeData = nodes[_j];
-          node = _this.findNode_(nodeData.id);
-          node.setValue(nodeData.text);
-          _ref = nodeData.connectedTo;
-          for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
-            id = _ref[_k];
-            other = _this.findNode_(id);
-            if (other != null) {
-              node.connectTo(other);
-            }
+      for (_j = 0, _len1 = nodes.length; _j < _len1; _j++) {
+        nodeData = nodes[_j];
+        node = this.findNode_(nodeData.id);
+        node.setValue(nodeData.text);
+        _ref = nodeData.connectedTo;
+        for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
+          id = _ref[_k];
+          other = this.findNode_(id);
+          if (other != null) {
+            node.connectTo(other);
           }
         }
-        return _this.nodeContainer.querySelector("p-node").drawAllConnections();
-      };
-      return setTimeout(redraw, 0);
+      }
+      this.nodeContainer.querySelector("p-node").drawAllConnections();
+      return this.dataRendered = true;
     };
 
     Persist.prototype.findNode_ = function(id) {
@@ -529,74 +517,7 @@
 
 }).call(this);
 
-},{}],11:[function(require,module,exports){
-(function() {
-  var Conversation, html, util;
-
-  util = require("../util.coffee");
-
-  Conversation = Object.create(HTMLElement.prototype);
-
-  html = "<div class=\"log\"></div>\n<input type=\"text\" class=\"conversation-input\" placeholder=\"Type to talk\">";
-
-  Conversation.insertedCallback = function() {
-    this.$el = $(this);
-    this.innerHTML = html;
-    return this.initListeners_();
-  };
-
-  Conversation.getValue = function() {
-    return this.querySelector(".conversation-input").value;
-  };
-
-  Conversation.clear = function() {
-    var log;
-    log = this.querySelector(".log");
-    return log.innerHTML = "";
-  };
-
-  Conversation.addInput = function(text) {
-    var input;
-    input = this.querySelector(".conversation-input");
-    input.value = "";
-    return this.addMessage(text, "input");
-  };
-
-  Conversation.addOutput = function(text) {
-    return this.addMessage(text, "output");
-  };
-
-  Conversation.addMessage = function(text, type) {
-    var $log, log, p;
-    log = this.querySelector(".log");
-    p = document.createElement("p");
-    p.classList.add(type);
-    p.innerText = text;
-    log.appendChild(p);
-    $log = $(log);
-    return $log.scrollTop(log.scrollHeight);
-  };
-
-  Conversation.initListeners_ = function() {
-    var input;
-    input = this.querySelector(".conversation-input");
-    $(input).on("input", this.inputTyped_.bind(this));
-    return $(input).on("keydown", this.inputTyped_.bind(this));
-  };
-
-  Conversation.inputTyped_ = function(e) {
-    if (e.keyCode === 13) {
-      return $(this).trigger("enter");
-    }
-  };
-
-  document.register("p-conversation", {
-    prototype: Conversation
-  });
-
-}).call(this);
-
-},{"../util.coffee":8}],9:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function() {
   var ConnectionLayer, html, util;
 
@@ -606,7 +527,7 @@
 
   html = "<svg></svg>";
 
-  ConnectionLayer.insertedCallback = function() {
+  ConnectionLayer.readyCallback = function() {
     this.$el = $(this);
     this.innerHTML = html;
     this.svg = this.querySelector("svg");
@@ -715,7 +636,7 @@
   */
 
 
-  Node.insertedCallback = function() {
+  Node.setup = function() {
     this.$el = $(this);
     this.innerHTML = html;
     this.querySelector(".node-text").select();
@@ -912,6 +833,73 @@
 
   document.register("p-node", {
     prototype: Node
+  });
+
+}).call(this);
+
+},{"../util.coffee":8}],11:[function(require,module,exports){
+(function() {
+  var Conversation, html, util;
+
+  util = require("../util.coffee");
+
+  Conversation = Object.create(HTMLElement.prototype);
+
+  html = "<div class=\"log\"></div>\n<input type=\"text\" class=\"conversation-input\" placeholder=\"Type to talk\">";
+
+  Conversation.insertedCallback = function() {
+    this.$el = $(this);
+    this.innerHTML = html;
+    return this.initListeners_();
+  };
+
+  Conversation.getValue = function() {
+    return this.querySelector(".conversation-input").value;
+  };
+
+  Conversation.clear = function() {
+    var log;
+    log = this.querySelector(".log");
+    return log.innerHTML = "";
+  };
+
+  Conversation.addInput = function(text) {
+    var input;
+    input = this.querySelector(".conversation-input");
+    input.value = "";
+    return this.addMessage(text, "input");
+  };
+
+  Conversation.addOutput = function(text) {
+    return this.addMessage(text, "output");
+  };
+
+  Conversation.addMessage = function(text, type) {
+    var $log, log, p;
+    log = this.querySelector(".log");
+    p = document.createElement("p");
+    p.classList.add(type);
+    p.innerText = text;
+    log.appendChild(p);
+    $log = $(log);
+    return $log.scrollTop(log.scrollHeight);
+  };
+
+  Conversation.initListeners_ = function() {
+    var input;
+    input = this.querySelector(".conversation-input");
+    $(input).on("input", this.inputTyped_.bind(this));
+    return $(input).on("keydown", this.inputTyped_.bind(this));
+  };
+
+  Conversation.inputTyped_ = function(e) {
+    if (e.keyCode === 13) {
+      return $(this).trigger("enter");
+    }
+  };
+
+  document.register("p-conversation", {
+    prototype: Conversation
   });
 
 }).call(this);

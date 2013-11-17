@@ -6,7 +6,7 @@ html = """
   <svg></svg>
 """
 
-ConnectionLayer.insertedCallback = ->
+ConnectionLayer.readyCallback = ->
   @$el = $(this)
   @innerHTML = html
   @svg = @querySelector("svg")

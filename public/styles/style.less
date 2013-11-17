@@ -220,28 +220,11 @@ p-conversation .log p{
   min-height: 34px;
 }
 
-
-
-/* creates triangle */
-p-conversation .log p:after {
-  content: "";
-  position: absolute;
-  border-style: solid;
-  display: block;
-}
-
 p-conversation .log .output{
   background-color: @outputColor;
   color: @secondary;
   margin-right: 40%;
   margin-left: 24px;
-}
-
-p-conversation .log .output:after{
-  left: -11px;
-  bottom: 6px;
-  border-width: 8px 12px 8px 0;
-  border-color: transparent @outputColor;
 }
 
 p-conversation .log .input{
@@ -251,14 +234,24 @@ p-conversation .log .input{
   margin-right: 24px;
 }
 
+/* Triangles */
+p-conversation .log p:after {
+  content: "";
+  position: absolute;
+  border-style: solid;
+  display: block;
+}
+
+p-conversation .log .output:after{
+  left: -11px;
+  bottom: 6px;
+  border-width: 8px 12px 8px 0;
+  border-color: transparent @outputColor;
+}
+
 p-conversation .log .input:after{
   right: -11px;
   bottom: 6px;
   border-width: 8px 0px 8px 12px;
   border-color: transparent @secondary;
 }
-
-
-
-
-

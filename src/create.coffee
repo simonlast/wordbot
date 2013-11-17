@@ -29,5 +29,7 @@ class Create
         top: (e.pageY - box.height/2) + "px"
       })
 
+      node.setup()
+
 
 module.exports = Create

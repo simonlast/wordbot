@@ -11,4 +11,4 @@ setup = ->
   controller = new Controller()
   persist = new Persist()
 
-$(setup)
+window.addEventListener('WebComponentsReady', setup)

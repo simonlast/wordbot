@@ -7,8 +7,8 @@ observerOpts = {
   subtree       : true
 }
 
-persistWait = 1000
-urlRegex = /\?(.*)/
+persistWait = 100
+urlRegex = /\/(.*)/
 
 
 class Persist
@@ -42,11 +42,8 @@ class Persist
 
 
   getPersisUrl_: ->
-    matches = urlRegex.exec(window.location.search)
-    if not matches?
-      window.location.href = "/?" + uuid()
-    else
-      return matches[1]
+    matches = urlRegex.exec(window.location.pathname)
+    return matches[1]
 
 
   persistAll_: (e) =>
@@ -57,7 +54,7 @@ class Persist
     data = @serializeAll_()
     if not _.isEqual(data, @lastData)
       @lastData = data
-      console.log "newData"
+      console.log "saving data"
 
       url = @getPersisUrl_()
       if url?
@@ -83,19 +80,15 @@ class Persist
   =========================================================================== ###
 
   loadData_: ->
-    url = @getPersisUrl_()
+    data = window.bootstrapData
+    if data?
+      @renderData_(data)
+    else
+      @dataRendered = true
 
-    if url?
-      db.get url, (data) =>
-        if data.err?
-          @dataRendered = true
-        else
-          @renderData_(data.value)
 
 
   renderData_: (nodes) ->
-    @dataRendered = true
-
     if (not nodes?) or (nodes.length is 0)
       return
 
@@ -112,24 +105,26 @@ class Persist
         top: nodeData.position.top + "px"
       })
 
-    # Wait until inserted is called
-    redraw = =>
+      node.setup()
 
-      # Connect nodes
-      for nodeData in nodes
-        node = @findNode_(nodeData.id)
 
-        # Set input value
-        node.setValue(nodeData.text)
+    # Connect nodes
+    for nodeData in nodes
+      node = @findNode_(nodeData.id)
 
-        for id in nodeData.connectedTo
-          other = @findNode_(id)
-          if other?
-            node.connectTo(other)
+      # Set input value
+      node.setValue(nodeData.text)
 
-      @nodeContainer.querySelector("p-node").drawAllConnections()
+      for id in nodeData.connectedTo
+        other = @findNode_(id)
+        if other?
+          node.connectTo(other)
 
-    setTimeout(redraw, 0)
+    @nodeContainer.querySelector("p-node").drawAllConnections()
+    @dataRendered = true
+
+
+
 
 
   findNode_: (id) ->

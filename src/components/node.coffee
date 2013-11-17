@@ -14,8 +14,8 @@ html = """
 
 =========================================================================== ###
 
-
-Node.insertedCallback = ->
+# Nodes must be explicity setup
+Node.setup = ->
   @$el = $(this)
   @innerHTML = html
 

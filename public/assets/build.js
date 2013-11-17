@@ -604,7 +604,7 @@
 
   Conversation = Object.create(HTMLElement.prototype);
 
-  html = "<div class=\"log\"></div>\n<input type=\"text\" class=\"conversation-input\">";
+  html = "<div class=\"log\"></div>\n<input type=\"text\" class=\"conversation-input\" placeholder=\"Type to talk\">";
 
   Conversation.insertedCallback = function() {
     this.$el = $(this);

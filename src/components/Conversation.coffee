@@ -4,7 +4,7 @@ Conversation = Object.create(HTMLElement.prototype)
 
 html = """
   <div class="log"></div>
-  <input type="text" class="conversation-input">
+  <input type="text" class="conversation-input" placeholder="Type to talk">
 """
 
 Conversation.insertedCallback = ->

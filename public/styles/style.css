@@ -111,17 +111,17 @@ p-node {
 }
 p-node.active {
   box-shadow: 0 0 24px rgba(100, 100, 100, 0.7);
-  -moz-transform: scale(1.05);
-  -webkit-transform: scale(1.05);
-  -o-transform: scale(1.05);
-  -ms-transform: scale(1.05);
+  -moz-transform: scale(1.08);
+  -webkit-transform: scale(1.08);
+  -o-transform: scale(1.08);
+  -ms-transform: scale(1.08);
 }
 p-node.potentialActive {
   box-shadow: 0 0 24px rgba(100, 100, 100, 0.7);
-  -moz-transform: scale(1.05);
-  -webkit-transform: scale(1.05);
-  -o-transform: scale(1.05);
-  -ms-transform: scale(1.05);
+  -moz-transform: scale(1.03);
+  -webkit-transform: scale(1.03);
+  -o-transform: scale(1.03);
+  -ms-transform: scale(1.03);
 }
 p-node.output {
   background-color: #d8715c;

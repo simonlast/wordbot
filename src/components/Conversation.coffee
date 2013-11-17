@@ -3,7 +3,7 @@ util = require("../util.coffee")
 Conversation = Object.create(HTMLElement.prototype)
 
 html = """
-
+  <div class="log"></div>
   <input type="text" class="conversation-input">
 """
 
@@ -17,8 +17,24 @@ Conversation.getValue = ->
   return @querySelector(".conversation-input").value
 
 
-Conversation.setValue = (value) ->
-  @querySelector(".conversation-input").value = value
+
+Conversation.addInput = ->
+  input = @querySelector(".conversation-input")
+  value = input.value
+  input.value = ""
+  @addMessage(value, "input")
+
+
+Conversation.addOutput = (text) ->
+  @addMessage(text, "output")
+
+
+Conversation.addMessage = (text, type) ->
+  p = document.createElement("p")
+  p.classList.add(type)
+  p.innerText = text
+  @querySelector(".log").appendChild(p)
+
 
 
 Conversation.initListeners_ = ->

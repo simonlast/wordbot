@@ -12,56 +12,66 @@ class Controller
 
   initListeners_: ->
     $(@conversation).on("enter", @textEntered_)
+    $(document).on("mousedown", "p-node", @selectNode_)
 
-    # $(document).on "mousedown", "p-node", (e) =>
-    #   console.log @getConnections_(e.target)
+
+  selectNode_: (e) =>
+    @setActiveNode_(e.target)
 
 
   textEntered_: (e) =>
     value = @conversation.getValue()
-    consumedTokens = @tryConsume_(@getTokens_(value))
+    tokens = @getTokens_(value)
+    consumedTokens = @tryConsume_(tokens)
     console.log "consumedTokens: ", consumedTokens
     if consumedTokens.length > 0
-      @conversation.setValue("")
+      @conversation.addInput()
 
 
   # Returns tokens left
   tryConsume_: (tokens) ->
+    # If there's no active node, return an empty array.
     activeNode = @getActiveNode_()
-    return if not activeNode?
+    return [] if not activeNode?
 
-    branches = @getConnections_(activeNode)
-    console.log "branches: ", branches
+    outputs = @getConnectedOutputs_(activeNode)
 
-    all = _.map branches, (branch) =>
-      branchText = branch.getValue()
-      branchTokens = @getTokens_(branchText)
-      console.log "compare: ", tokens, branchTokens
-      numEqual = @numEqual_(tokens, branchTokens)
-      isConsumed = (numEqual >= branchTokens.length)
-      return {branch, numEqual, isConsumed}
+    # If there's an output, consume that and recur.
+    if outputs.length > 0
+      @setActiveNode_(outputs[0])
+      return @tryConsume_(tokens)
 
-    best = _.max all, (data) ->
-      return data.numEqual
+    else
 
+      # If no tokens left to consume, return an empty array.
+      if tokens.length is 0
+        return []
 
-    consumed = _.first(tokens, best.numEqual)
-    rest = _.rest(tokens, best.numEqual)
+      inputs = @getConnectedInputs_(activeNode)
 
-    # A node was consumed.
-    if (best.isConsumed)
-      @setActiveNode_(best.branch)
+      # Find the input that will consume the most tokens.
+      consumeData = _.map inputs, (input) =>
+        inputText = input.getValue()
+        inputTokens = @getTokens_(inputText)
+        numEqual = @numEqual_(tokens, inputTokens)
+        isConsumed = (numEqual >= inputTokens.length)
+        return {input, numEqual, isConsumed}
 
-      # Still more to go
-      if (best.numEqual < tokens.length)
+      bestInputData = _.max consumeData, (data) ->
+        return data.numEqual
+
+      consumed = _.first(tokens, bestInputData.numEqual)
+      rest = _.rest(tokens, bestInputData.numEqual)
+
+      # A node was consumed.
+      if (bestInputData.isConsumed)
+        @setActiveNode_(bestInputData.input)
         moreConsumed = @tryConsume_(rest)
         return _.union(consumed, moreConsumed)
-      else
-        return consumed
 
-    # Otherwise, nothing was consumed.
-    else
-      return []
+      # Otherwise, nothing was consumed.
+      else
+        return []
 
 
   numEqual_: (tokens1, tokens2) ->
@@ -89,23 +99,22 @@ class Controller
     return text.split(" ")
 
 
-  getConnections_: (node) ->
+  getConnectedOutputs_: (node) ->
     connectedTo = node.connectedTo
 
     outputs = _.filter connectedTo, (el) ->
       return el.classList.contains("output")
 
-    inputs = _.difference(connectedTo, outputs)
+    return outputs
 
-    allConnections = _.map outputs, (output) =>
-      return @getConnections_(output)
 
-    allConnections.unshift(inputs)
+  getConnectedInputs_: (node) ->
+    connectedTo = node.connectedTo
 
-    flattened = _.flatten(allConnections)
-    unique = _.uniq(flattened)
+    inputs = _.filter connectedTo, (el) ->
+      return not el.classList.contains("output")
 
-    return unique
+    return inputs
 
 
   getActiveNode_: ->
@@ -119,6 +128,11 @@ class Controller
       el.classList.remove("active")
 
     node.classList.add("active")
+
+
+    if node.classList.contains("output")
+      @conversation.addOutput(node.getValue())
+
 
 
 

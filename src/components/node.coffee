@@ -21,7 +21,6 @@ Node.insertedCallback = ->
 
 
 Node.initListeners_ = ->
-  @$el.on("mousedown", @mouseDown.bind(this))
   @$el.on("click", ".swap-type", @swapType_.bind(this))
 
   @$el.on("p-dragstart", @dragStart_.bind(this))
@@ -41,17 +40,6 @@ Node.getValue = ->
 
 Node.swapType_ = (e) ->
   @classList.toggle("output")
-
-
-### ===========================================================================
-
-  Selection
-
-=========================================================================== ###
-
-
-Node.mouseDown = (e) ->
-  @select()
 
 
 

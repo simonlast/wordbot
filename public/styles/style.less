@@ -3,6 +3,7 @@
 @connections: rgb(194,203,206);
 @dark: rgb(164,188,194);
 @text: #52737b;
+@outputColor: rgb(216,113,92);
 
 *{
   box-sizing: border-box;
@@ -137,12 +138,12 @@ p-node{
   .ease(100ms, background-color);
 }
 
-.active{
+p-node.active{
   box-shadow: 0 0 24px @dark;
 }
 
-.output{
-  background-color: rgb(216,113,92);
+p-node.output{
+  background-color: @outputColor;
 }
 
 p-node .node-text{
@@ -181,6 +182,7 @@ p-conversation{
   width: 100%;
   height: 100%;
   background-color: @dark;
+  box-shadow: 10px -12px 32px rgba(0,0,0,.6);
 }
 
 p-conversation .conversation-input{
@@ -199,6 +201,23 @@ p-conversation .conversation-input{
   font-weight: 100;
 }
 
+p-conversation .log p{
+  margin: 8px;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+p-conversation .log .input{
+  background-color: @secondary;
+  margin-right: 40%;
+}
+
+p-conversation .log .output{
+  background-color: @outputColor;
+  color: @secondary;
+  text-align: right;
+  margin-left: 40%;
+}
 
 
 

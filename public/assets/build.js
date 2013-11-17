@@ -142,62 +142,72 @@
   Controller = (function() {
     function Controller() {
       this.textEntered_ = __bind(this.textEntered_, this);
+      this.selectNode_ = __bind(this.selectNode_, this);
       this.nodeContainer = document.querySelector(".node-container");
       this.conversation = document.querySelector("p-conversation");
       this.initListeners_();
     }
 
     Controller.prototype.initListeners_ = function() {
-      return $(this.conversation).on("enter", this.textEntered_);
+      $(this.conversation).on("enter", this.textEntered_);
+      return $(document).on("mousedown", "p-node", this.selectNode_);
+    };
+
+    Controller.prototype.selectNode_ = function(e) {
+      return this.setActiveNode_(e.target);
     };
 
     Controller.prototype.textEntered_ = function(e) {
-      var consumedTokens, value;
+      var consumedTokens, tokens, value;
       value = this.conversation.getValue();
-      consumedTokens = this.tryConsume_(this.getTokens_(value));
+      tokens = this.getTokens_(value);
+      consumedTokens = this.tryConsume_(tokens);
       console.log("consumedTokens: ", consumedTokens);
       if (consumedTokens.length > 0) {
-        return this.conversation.setValue("");
+        return this.conversation.addInput();
       }
     };
 
     Controller.prototype.tryConsume_ = function(tokens) {
-      var activeNode, all, best, branches, consumed, moreConsumed, rest,
+      var activeNode, bestInputData, consumeData, consumed, inputs, moreConsumed, outputs, rest,
         _this = this;
       activeNode = this.getActiveNode_();
       if (activeNode == null) {
-        return;
+        return [];
       }
-      branches = this.getConnections_(activeNode);
-      console.log("branches: ", branches);
-      all = _.map(branches, function(branch) {
-        var branchText, branchTokens, isConsumed, numEqual;
-        branchText = branch.getValue();
-        branchTokens = _this.getTokens_(branchText);
-        console.log("compare: ", tokens, branchTokens);
-        numEqual = _this.numEqual_(tokens, branchTokens);
-        isConsumed = numEqual >= branchTokens.length;
-        return {
-          branch: branch,
-          numEqual: numEqual,
-          isConsumed: isConsumed
-        };
-      });
-      best = _.max(all, function(data) {
-        return data.numEqual;
-      });
-      consumed = _.first(tokens, best.numEqual);
-      rest = _.rest(tokens, best.numEqual);
-      if (best.isConsumed) {
-        this.setActiveNode_(best.branch);
-        if (best.numEqual < tokens.length) {
+      outputs = this.getConnectedOutputs_(activeNode);
+      if (outputs.length > 0) {
+        this.setActiveNode_(outputs[0]);
+        return this.tryConsume_(tokens);
+      } else {
+        if (tokens.length === 0) {
+          return [];
+        }
+        inputs = this.getConnectedInputs_(activeNode);
+        consumeData = _.map(inputs, function(input) {
+          var inputText, inputTokens, isConsumed, numEqual;
+          inputText = input.getValue();
+          inputTokens = _this.getTokens_(inputText);
+          numEqual = _this.numEqual_(tokens, inputTokens);
+          isConsumed = numEqual >= inputTokens.length;
+          return {
+            input: input,
+            numEqual: numEqual,
+            isConsumed: isConsumed
+          };
+        });
+        bestInputData = _.max(consumeData, function(data) {
+          return data.numEqual;
+        });
+        consumed = _.first(tokens, bestInputData.numEqual);
+        rest = _.rest(tokens, bestInputData.numEqual);
+        if (bestInputData.isConsumed) {
+          this.setActiveNode_(bestInputData.input);
           moreConsumed = this.tryConsume_(rest);
           return _.union(consumed, moreConsumed);
         } else {
-          return consumed;
+          return [];
         }
-      } else {
-        return [];
       }
     };
 
@@ -226,21 +236,22 @@
       return text.split(" ");
     };
 
-    Controller.prototype.getConnections_ = function(node) {
-      var allConnections, connectedTo, flattened, inputs, outputs, unique,
-        _this = this;
+    Controller.prototype.getConnectedOutputs_ = function(node) {
+      var connectedTo, outputs;
       connectedTo = node.connectedTo;
       outputs = _.filter(connectedTo, function(el) {
         return el.classList.contains("output");
       });
-      inputs = _.difference(connectedTo, outputs);
-      allConnections = _.map(outputs, function(output) {
-        return _this.getConnections_(output);
+      return outputs;
+    };
+
+    Controller.prototype.getConnectedInputs_ = function(node) {
+      var connectedTo, inputs;
+      connectedTo = node.connectedTo;
+      inputs = _.filter(connectedTo, function(el) {
+        return !el.classList.contains("output");
       });
-      allConnections.unshift(inputs);
-      flattened = _.flatten(allConnections);
-      unique = _.uniq(flattened);
-      return unique;
+      return inputs;
     };
 
     Controller.prototype.getActiveNode_ = function() {
@@ -254,7 +265,10 @@
         el = active[_i];
         el.classList.remove("active");
       }
-      return node.classList.add("active");
+      node.classList.add("active");
+      if (node.classList.contains("output")) {
+        return this.conversation.addOutput(node.getValue());
+      }
     };
 
     return Controller;
@@ -463,7 +477,6 @@
   };
 
   Node.initListeners_ = function() {
-    this.$el.on("mousedown", this.mouseDown.bind(this));
     this.$el.on("click", ".swap-type", this.swapType_.bind(this));
     this.$el.on("p-dragstart", this.dragStart_.bind(this));
     this.$el.on("p-dragmove", this.dragMove_.bind(this));
@@ -480,18 +493,6 @@
 
   Node.swapType_ = function(e) {
     return this.classList.toggle("output");
-  };
-
-  /* ===========================================================================
-  
-    Selection
-  
-  ===========================================================================
-  */
-
-
-  Node.mouseDown = function(e) {
-    return this.select();
   };
 
   /* ===========================================================================
@@ -632,7 +633,7 @@
 
   Conversation = Object.create(HTMLElement.prototype);
 
-  html = "\n<input type=\"text\" class=\"conversation-input\">";
+  html = "<div class=\"log\"></div>\n<input type=\"text\" class=\"conversation-input\">";
 
   Conversation.insertedCallback = function() {
     this.$el = $(this);
@@ -644,8 +645,24 @@
     return this.querySelector(".conversation-input").value;
   };
 
-  Conversation.setValue = function(value) {
-    return this.querySelector(".conversation-input").value = value;
+  Conversation.addInput = function() {
+    var input, value;
+    input = this.querySelector(".conversation-input");
+    value = input.value;
+    input.value = "";
+    return this.addMessage(value, "input");
+  };
+
+  Conversation.addOutput = function(text) {
+    return this.addMessage(text, "output");
+  };
+
+  Conversation.addMessage = function(text, type) {
+    var p;
+    p = document.createElement("p");
+    p.classList.add(type);
+    p.innerText = text;
+    return this.querySelector(".log").appendChild(p);
   };
 
   Conversation.initListeners_ = function() {

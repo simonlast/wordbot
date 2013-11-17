@@ -529,7 +529,74 @@
 
 }).call(this);
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+(function() {
+  var Conversation, html, util;
+
+  util = require("../util.coffee");
+
+  Conversation = Object.create(HTMLElement.prototype);
+
+  html = "<div class=\"log\"></div>\n<input type=\"text\" class=\"conversation-input\" placeholder=\"Type to talk\">";
+
+  Conversation.insertedCallback = function() {
+    this.$el = $(this);
+    this.innerHTML = html;
+    return this.initListeners_();
+  };
+
+  Conversation.getValue = function() {
+    return this.querySelector(".conversation-input").value;
+  };
+
+  Conversation.clear = function() {
+    var log;
+    log = this.querySelector(".log");
+    return log.innerHTML = "";
+  };
+
+  Conversation.addInput = function(text) {
+    var input;
+    input = this.querySelector(".conversation-input");
+    input.value = "";
+    return this.addMessage(text, "input");
+  };
+
+  Conversation.addOutput = function(text) {
+    return this.addMessage(text, "output");
+  };
+
+  Conversation.addMessage = function(text, type) {
+    var $log, log, p;
+    log = this.querySelector(".log");
+    p = document.createElement("p");
+    p.classList.add(type);
+    p.innerText = text;
+    log.appendChild(p);
+    $log = $(log);
+    return $log.scrollTop(log.scrollHeight);
+  };
+
+  Conversation.initListeners_ = function() {
+    var input;
+    input = this.querySelector(".conversation-input");
+    $(input).on("input", this.inputTyped_.bind(this));
+    return $(input).on("keydown", this.inputTyped_.bind(this));
+  };
+
+  Conversation.inputTyped_ = function(e) {
+    if (e.keyCode === 13) {
+      return $(this).trigger("enter");
+    }
+  };
+
+  document.register("p-conversation", {
+    prototype: Conversation
+  });
+
+}).call(this);
+
+},{"../util.coffee":8}],9:[function(require,module,exports){
 (function() {
   var ConnectionLayer, html, util;
 
@@ -845,73 +912,6 @@
 
   document.register("p-node", {
     prototype: Node
-  });
-
-}).call(this);
-
-},{"../util.coffee":8}],11:[function(require,module,exports){
-(function() {
-  var Conversation, html, util;
-
-  util = require("../util.coffee");
-
-  Conversation = Object.create(HTMLElement.prototype);
-
-  html = "<div class=\"log\"></div>\n<input type=\"text\" class=\"conversation-input\" placeholder=\"Type to talk\">";
-
-  Conversation.insertedCallback = function() {
-    this.$el = $(this);
-    this.innerHTML = html;
-    return this.initListeners_();
-  };
-
-  Conversation.getValue = function() {
-    return this.querySelector(".conversation-input").value;
-  };
-
-  Conversation.clear = function() {
-    var log;
-    log = this.querySelector(".log");
-    return log.innerHTML = "";
-  };
-
-  Conversation.addInput = function(text) {
-    var input;
-    input = this.querySelector(".conversation-input");
-    input.value = "";
-    return this.addMessage(text, "input");
-  };
-
-  Conversation.addOutput = function(text) {
-    return this.addMessage(text, "output");
-  };
-
-  Conversation.addMessage = function(text, type) {
-    var $log, log, p;
-    log = this.querySelector(".log");
-    p = document.createElement("p");
-    p.classList.add(type);
-    p.innerText = text;
-    log.appendChild(p);
-    $log = $(log);
-    return $log.scrollTop(log.scrollHeight);
-  };
-
-  Conversation.initListeners_ = function() {
-    var input;
-    input = this.querySelector(".conversation-input");
-    $(input).on("input", this.inputTyped_.bind(this));
-    return $(input).on("keydown", this.inputTyped_.bind(this));
-  };
-
-  Conversation.inputTyped_ = function(e) {
-    if (e.keyCode === 13) {
-      return $(this).trigger("enter");
-    }
-  };
-
-  document.register("p-conversation", {
-    prototype: Conversation
   });
 
 }).call(this);

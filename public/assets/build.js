@@ -288,8 +288,13 @@
     };
 
     Controller.prototype.getTokens_ = function(text) {
+      var tokens;
       text = text.toLowerCase();
-      return text.split(" ");
+      tokens = text.split(" ");
+      tokens = _.filter(tokens, function(token) {
+        return token.length > 0;
+      });
+      return tokens;
     };
 
     Controller.prototype.getConnectedOutputs_ = function(node) {

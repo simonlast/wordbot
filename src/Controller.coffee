@@ -119,7 +119,11 @@ class Controller
 
   getTokens_: (text) ->
     text = text.toLowerCase()
-    return text.split(" ")
+    tokens = text.split(" ")
+    tokens = _.filter tokens, (token) ->
+      return token.length > 0
+
+    return tokens
 
 
   getConnectedOutputs_: (node) ->

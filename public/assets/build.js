@@ -17,7 +17,7 @@
 
 }).call(this);
 
-},{"./db.coffee":2,"./components/loadAll.coffee":3,"./polyfill.coffee":4,"./create.coffee":5,"./Controller.coffee":6,"./persist.coffee":7}],2:[function(require,module,exports){
+},{"./Controller.coffee":6,"./components/loadAll.coffee":3,"./create.coffee":5,"./db.coffee":2,"./persist.coffee":7,"./polyfill.coffee":4}],2:[function(require,module,exports){
 (function() {
   var db, socket;
 
@@ -521,7 +521,7 @@
 
 }).call(this);
 
-},{"./ConnectionLayer.coffee":9,"./Node.coffee":10,"./Conversation.coffee":11}],8:[function(require,module,exports){
+},{"./ConnectionLayer.coffee":9,"./Conversation.coffee":11,"./Node.coffee":10}],8:[function(require,module,exports){
 (function() {
   var util;
 

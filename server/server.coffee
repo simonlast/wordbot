@@ -6,7 +6,7 @@ sio = require('socket.io')
 path = require("path")
 _ = require("underscore")
 cons = require("consolidate")
-shortId = require("shortId")
+shortId = require("shortid")
 
 db = require("./db")
 

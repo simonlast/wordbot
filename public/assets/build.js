@@ -1,6 +1,6 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
 (function() {
-  var Controller, Create, Drag, setup;
+  var Controller, Create, Drag, Persist, setup;
 
   require("./components/loadAll.coffee");
 
@@ -10,18 +10,21 @@
 
   Controller = require("./controller.coffee");
 
+  Persist = require("./persist.coffee");
+
   setup = function() {
-    var controller, create, drag;
+    var controller, create, drag, persist;
     drag = new Drag();
     create = new Create();
-    return controller = new Controller();
+    controller = new Controller();
+    return persist = new Persist();
   };
 
   $(setup);
 
 }).call(this);
 
-},{"./components/loadAll.coffee":2,"./polyfill.coffee":3,"./create.coffee":4,"./controller.coffee":5}],3:[function(require,module,exports){
+},{"./components/loadAll.coffee":2,"./polyfill.coffee":3,"./create.coffee":4,"./controller.coffee":5,"./persist.coffee":6}],3:[function(require,module,exports){
 (function() {
   var Drag,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -89,6 +92,48 @@
 
 }).call(this);
 
+},{}],6:[function(require,module,exports){
+(function() {
+  var Persist,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  Persist = (function() {
+    function Persist() {
+      this.persistAll_ = __bind(this.persistAll_, this);
+      this.persistAllNext_ = __bind(this.persistAllNext_, this);
+      this.nodeContainer = document.querySelector(".node-container");
+      this.lastData = null;
+    }
+
+    Persist.prototype.persistAllNext_ = function(e) {
+      return setTimeout(this.persistAll_, 0);
+    };
+
+    Persist.prototype.persistAll_ = function(e) {
+      var data;
+      data = this.serializeAll_();
+      if (!_.isEqual(data, this.lastData)) {
+        return this.lastData = data;
+      }
+    };
+
+    Persist.prototype.serializeAll_ = function() {
+      var all, nodes;
+      nodes = $(this.nodeContainer).children();
+      all = _.map(nodes, function(node) {
+        return node.serialize();
+      });
+      return all;
+    };
+
+    return Persist;
+
+  })();
+
+  module.exports = Persist;
+
+}).call(this);
+
 },{}],4:[function(require,module,exports){
 (function() {
   var Create, util,
@@ -133,7 +178,7 @@
 
 }).call(this);
 
-},{"./util.coffee":6}],5:[function(require,module,exports){
+},{"./util.coffee":7}],5:[function(require,module,exports){
 (function() {
   var Controller, util,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -283,7 +328,7 @@
 
 }).call(this);
 
-},{"./util.coffee":6}],2:[function(require,module,exports){
+},{"./util.coffee":7}],2:[function(require,module,exports){
 (function() {
   require("./ConnectionLayer.coffee");
 
@@ -293,7 +338,7 @@
 
 }).call(this);
 
-},{"./ConnectionLayer.coffee":7,"./Node.coffee":8,"./Conversation.coffee":9}],6:[function(require,module,exports){
+},{"./ConnectionLayer.coffee":8,"./Node.coffee":9,"./Conversation.coffee":10}],7:[function(require,module,exports){
 (function() {
   var util;
 
@@ -326,7 +371,7 @@
 
 }).call(this);
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function() {
   var ConnectionLayer, html, util;
 
@@ -427,7 +472,7 @@
 
 }).call(this);
 
-},{"../util.coffee":6}],8:[function(require,module,exports){
+},{"../util.coffee":7}],9:[function(require,module,exports){
 (function() {
   var Node, html, util;
 
@@ -436,6 +481,14 @@
   Node = Object.create(HTMLElement.prototype);
 
   html = "<input class=\"node-text\">\n<button class=\"swap-type\">↺</button>";
+
+  /* ===========================================================================
+  
+    Setup
+  
+  ===========================================================================
+  */
+
 
   Node.insertedCallback = function() {
     this.$el = $(this);
@@ -449,6 +502,7 @@
   };
 
   Node.initListeners_ = function() {
+    this.$el.on("mousedown", this.mouseDown_.bind(this));
     this.$el.on("click", ".swap-type", this.swapType_.bind(this));
     this.$el.on("p-dragstart", this.dragStart_.bind(this));
     this.$el.on("p-dragmove", this.dragMove_.bind(this));
@@ -459,12 +513,89 @@
     return this.$layerGroup.on("p-dragend", this.connectDragEnd_.bind(this));
   };
 
+  /* ===========================================================================
+  
+    Public
+  
+  ===========================================================================
+  */
+
+
   Node.getValue = function() {
     return this.querySelector(".node-text").value;
   };
 
   Node.swapType_ = function(e) {
     return this.classList.toggle("output");
+  };
+
+  Node.serialize = function() {
+    var connectedToIds, type;
+    connectedToIds = _.map(this.connectedTo, function(node) {
+      return node.getAttribute("node-id");
+    });
+    type = "input";
+    if (this.classList.contains("output")) {
+      type = "output";
+    }
+    return {
+      id: this.getAttribute("node-id"),
+      type: type,
+      connectedTo: connectedToIds
+    };
+  };
+
+  Node.selectNode = function() {
+    return this.classList.add("active");
+  };
+
+  Node.deselectNode = function() {
+    return this.classList.remove("active");
+  };
+
+  Node.drawConnections = function() {
+    var elBox, other, _i, _len, _ref;
+    this.connectionLayer.clear(this.nodeId);
+    _ref = this.connectedTo;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      other = _ref[_i];
+      this.connectionLayer.addLineEl(this.nodeId, this, other);
+    }
+    elBox = util.getElOuterBox(this);
+    return this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 25);
+  };
+
+  Node.drawAllConnections = function() {
+    var all, node, _i, _len, _results;
+    all = document.querySelectorAll("p-node");
+    _results = [];
+    for (_i = 0, _len = all.length; _i < _len; _i++) {
+      node = all[_i];
+      _results.push(node.drawConnections());
+    }
+    return _results;
+  };
+
+  Node.connectTo = function(other) {
+    return this.connectedTo = _.union(this.connectedTo, [other]);
+  };
+
+  Node.disconnectFrom = function(other) {
+    return this.connectedTo = _.without(this.connectedTo, other);
+  };
+
+  /* ===========================================================================
+  
+    Prevent Default
+  
+  ===========================================================================
+  */
+
+
+  Node.mouseDown_ = function(e) {
+    if (e.target === e.currentTarget) {
+      return e.preventDefault();
+    }
   };
 
   /* ===========================================================================
@@ -543,60 +674,13 @@
     return this.drawConnections(this.nodeId);
   };
 
-  /* ===========================================================================
-  
-    Helpers
-  
-  ===========================================================================
-  */
-
-
-  Node.selectNode = function() {
-    return this.classList.add("active");
-  };
-
-  Node.deselectNode = function() {
-    return this.classList.remove("active");
-  };
-
-  Node.drawConnections = function() {
-    var elBox, other, _i, _len, _ref;
-    this.connectionLayer.clear(this.nodeId);
-    _ref = this.connectedTo;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      other = _ref[_i];
-      this.connectionLayer.addLineEl(this.nodeId, this, other);
-    }
-    elBox = util.getElOuterBox(this);
-    return this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 25);
-  };
-
-  Node.drawAllConnections = function() {
-    var all, node, _i, _len, _results;
-    all = document.querySelectorAll("p-node");
-    _results = [];
-    for (_i = 0, _len = all.length; _i < _len; _i++) {
-      node = all[_i];
-      _results.push(node.drawConnections());
-    }
-    return _results;
-  };
-
-  Node.connectTo = function(other) {
-    return this.connectedTo = _.union(this.connectedTo, [other]);
-  };
-
-  Node.disconnectFrom = function(other) {
-    return this.connectedTo = _.without(this.connectedTo, other);
-  };
-
   document.register("p-node", {
     prototype: Node
   });
 
 }).call(this);
 
-},{"../util.coffee":6}],9:[function(require,module,exports){
+},{"../util.coffee":7}],10:[function(require,module,exports){
 (function() {
   var Conversation, html, util;
 
@@ -663,5 +747,5 @@
 
 }).call(this);
 
-},{"../util.coffee":6}]},{},[1])
+},{"../util.coffee":7}]},{},[1])
 ;

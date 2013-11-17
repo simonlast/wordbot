@@ -7,6 +7,15 @@ html = """
   <button class="swap-type">↺</button>
 """
 
+
+
+### ===========================================================================
+
+  Setup
+
+=========================================================================== ###
+
+
 Node.insertedCallback = ->
   @$el = $(this)
   @innerHTML = html
@@ -21,6 +30,9 @@ Node.insertedCallback = ->
 
 
 Node.initListeners_ = ->
+  # For preventing default
+  @$el.on("mousedown", @mouseDown_.bind(this))
+
   @$el.on("click", ".swap-type", @swapType_.bind(this))
 
   @$el.on("p-dragstart", @dragStart_.bind(this))
@@ -33,6 +45,14 @@ Node.initListeners_ = ->
   @$layerGroup.on("p-dragend", @connectDragEnd_.bind(this))
 
 
+
+### ===========================================================================
+
+  Public
+
+=========================================================================== ###
+
+
 Node.getValue = ->
   @querySelector(".node-text").value
 
@@ -41,6 +61,65 @@ Node.getValue = ->
 Node.swapType_ = (e) ->
   @classList.toggle("output")
 
+
+
+Node.serialize = ->
+  connectedToIds = _.map @connectedTo, (node) ->
+    return node.getAttribute("node-id")
+
+  type = "input"
+  if @classList.contains("output")
+    type = "output"
+
+  return {
+    id: @getAttribute("node-id")
+    type: type
+    connectedTo: connectedToIds
+  }
+
+
+Node.selectNode = ->
+  @classList.add("active")
+
+
+Node.deselectNode = ->
+  @classList.remove("active")
+
+
+Node.drawConnections = ->
+  @connectionLayer.clear(@nodeId)
+  for other in @connectedTo
+    @connectionLayer.addLineEl(@nodeId, this, other)
+
+  elBox = util.getElOuterBox(this)
+  @connectionLayer.addNib(@nodeId, elBox.left + elBox.width/2, elBox.top + elBox.height, 25)
+
+
+Node.drawAllConnections = ->
+  all = document.querySelectorAll("p-node")
+  for node in all
+    node.drawConnections()
+
+
+Node.connectTo = (other) ->
+  @connectedTo = _.union(@connectedTo, [other])
+
+
+Node.disconnectFrom = (other) ->
+  @connectedTo = _.without(@connectedTo, other)
+
+
+
+### ===========================================================================
+
+  Prevent Default
+
+=========================================================================== ###
+
+
+Node.mouseDown_ = (e) ->
+  if e.target is e.currentTarget
+    e.preventDefault()
 
 
 ### ===========================================================================
@@ -114,44 +193,6 @@ Node.connectDragEnd_ = (e) ->
     @connectTo(other)
 
   @drawConnections(@nodeId)
-
-
-
-### ===========================================================================
-
-  Helpers
-
-=========================================================================== ###
-
-Node.selectNode = ->
-  @classList.add("active")
-
-
-Node.deselectNode = ->
-  @classList.remove("active")
-
-
-Node.drawConnections = ->
-  @connectionLayer.clear(@nodeId)
-  for other in @connectedTo
-    @connectionLayer.addLineEl(@nodeId, this, other)
-
-  elBox = util.getElOuterBox(this)
-  @connectionLayer.addNib(@nodeId, elBox.left + elBox.width/2, elBox.top + elBox.height, 25)
-
-
-Node.drawAllConnections = ->
-  all = document.querySelectorAll("p-node")
-  for node in all
-    node.drawConnections()
-
-
-Node.connectTo = (other) ->
-  @connectedTo = _.union(@connectedTo, [other])
-
-
-Node.disconnectFrom = (other) ->
-  @connectedTo = _.without(@connectedTo, other)
 
 
 document.register("p-node", {

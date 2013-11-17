@@ -6,10 +6,12 @@ class Drag
     @dragging = false
     @initListeners()
 
+
   initListeners: ->
     @$root.on("mousedown", @startDrag)
     @$root.on("mousemove", @contDrag)
     @$root.on("mouseup", @endDrag)
+
 
   startDrag: (e) =>
     target = e.target
@@ -21,6 +23,7 @@ class Drag
 
     @draggedTarget = target
 
+
   contDrag: (e) =>
     if @draggedTarget?
       if not @dragging
@@ -28,11 +31,13 @@ class Drag
         @dragging = true
       @triggerEvent("p-dragmove", @draggedTarget, e)
 
+
   endDrag: (e) =>
     if @draggedTarget?
       @triggerEvent("p-dragend", @draggedTarget, e)
       @dragging = false
       @draggedTarget = null
+
 
   triggerEvent: (type, target, e) ->
     newEvent = $.Event(type)
@@ -41,5 +46,6 @@ class Drag
     newEvent.target = e.target
     newEvent.originalEvent = e
     $(target).trigger(newEvent)
+
 
 module.exports = Drag

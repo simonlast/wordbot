@@ -6,7 +6,6 @@ class Controller
   constructor: ->
     @nodeContainer = document.querySelector(".node-container")
     @conversation = document.querySelector("p-conversation")
-
     @initListeners_()
 
 
@@ -128,12 +127,10 @@ class Controller
 
   setActiveNode_: (node) ->
     active = @nodeContainer.querySelectorAll(".active")
-
     for el in active
       el.deselectNode()
 
     node.selectNode()
-
 
     if node.classList.contains("output")
       @conversation.addOutput(node.getValue())

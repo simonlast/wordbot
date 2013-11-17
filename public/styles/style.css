@@ -106,7 +106,10 @@ p-node {
   -ms-transition: background-color 100ms ease-in-out;
 }
 p-node.active {
-  box-shadow: 0 0 24px #a4bcc2;
+  box-shadow: 0 0 48px #646464;
+}
+p-node.potentialActive {
+  box-shadow: 0 0 24px #646464;
 }
 p-node.output {
   background-color: #d8715c;

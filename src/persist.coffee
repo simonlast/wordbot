@@ -88,6 +88,8 @@ class Persist
 
 
   renderData_: (nodes) ->
+    @dataRendered = true
+
     if (not nodes?) or (nodes.length is 0)
       return
 
@@ -121,7 +123,6 @@ class Persist
           node.connectTo(other)
 
     @nodeContainer.querySelector("p-node").drawAllConnections()
-    @dataRendered = true
 
 
   findNode_: (id) ->

@@ -182,6 +182,7 @@
   Controller = (function() {
     function Controller() {
       this.textEntered_ = __bind(this.textEntered_, this);
+      this.textTyped_ = __bind(this.textTyped_, this);
       this.selectNode_ = __bind(this.selectNode_, this);
       this.nodeContainer = document.querySelector(".node-container");
       this.conversation = document.querySelector("p-conversation");
@@ -190,6 +191,7 @@
 
     Controller.prototype.initListeners_ = function() {
       $(this.conversation).on("enter", this.textEntered_);
+      $(this.conversation).on("input", this.textTyped_);
       $(document).on("mousedown", "p-node", this.selectNode_);
       return $(document).on("input", "p-node", this.selectNode_);
     };
@@ -199,60 +201,66 @@
       return this.setActiveNode_(e.currentTarget);
     };
 
-    Controller.prototype.textEntered_ = function(e) {
-      var consumedTokens, tokens, value;
+    Controller.prototype.textTyped_ = function(e) {
+      var activeNode, consumedNodes, tokens, value;
       value = this.conversation.getValue();
       tokens = this.getTokens_(value);
-      consumedTokens = this.tryConsume_(tokens);
-      return console.log("consumedTokens: ", consumedTokens);
+      activeNode = this.getActiveNode_();
+      consumedNodes = this.getConsumedNodes_([activeNode], tokens);
+      console.log(consumedNodes);
+      return this.setPotentialNodes_(consumedNodes);
     };
 
-    Controller.prototype.tryConsume_ = function(tokens) {
-      var activeNode, bestInputData, consumeData, consumed, inputText, inputs, moreConsumed, outputs, reduce, rest,
-        _this = this;
+    Controller.prototype.textEntered_ = function(e) {
+      var activeNode, consumedNodes, tokens, value;
+      value = this.conversation.getValue();
+      tokens = this.getTokens_(value);
       activeNode = this.getActiveNode_();
-      if (activeNode == null) {
-        return [];
+      consumedNodes = this.getConsumedNodes_([activeNode], tokens);
+      if (consumedNodes.length > 0) {
+        this.setActiveNode_(consumedNodes[consumedNodes.length - 1]);
+        this.setPotentialNodes_([]);
+        return this.conversation.addInput();
       }
-      outputs = this.getConnectedOutputs_(activeNode);
+    };
+
+    Controller.prototype.getConsumedNodes_ = function(nodes, tokens) {
+      var bestInputData, consumeData, consumed, consumedNodes, inputs, lastNode, outputs, rest,
+        _this = this;
+      lastNode = nodes[nodes.length - 1];
+      outputs = this.getConnectedOutputs_(lastNode);
       if (outputs.length > 0) {
-        this.setActiveNode_(outputs[0]);
-        return this.tryConsume_(tokens);
-      } else {
-        if (tokens.length === 0) {
-          return [];
-        }
-        inputs = this.getConnectedInputs_(activeNode);
-        consumeData = _.map(inputs, function(input) {
-          var inputText, inputTokens, isConsumed, numEqual;
-          inputText = input.getValue();
-          inputTokens = _this.getTokens_(inputText);
-          numEqual = _this.numEqual_(tokens, inputTokens);
-          isConsumed = numEqual >= inputTokens.length;
-          return {
-            input: input,
-            numEqual: numEqual,
-            isConsumed: isConsumed
-          };
-        });
-        bestInputData = _.max(consumeData, function(data) {
-          return data.numEqual;
-        });
-        consumed = _.first(tokens, bestInputData.numEqual);
-        rest = _.rest(tokens, bestInputData.numEqual);
-        if (bestInputData.isConsumed) {
-          this.setActiveNode_(bestInputData.input);
-          reduce = function(text, curr) {
-            return text += curr;
-          };
-          inputText = _.reduce(consumed, reduce, "");
-          this.conversation.addInput(inputText);
-          moreConsumed = this.tryConsume_(rest);
-          return _.union(consumed, moreConsumed);
-        } else {
-          return [];
-        }
+        nodes = _.union(nodes, [outputs[0]]);
+        consumedNodes = this.getConsumedNodes_(nodes, tokens);
+        return consumedNodes;
       }
+      if (tokens.length === 0) {
+        return nodes;
+      }
+      inputs = this.getConnectedInputs_(lastNode);
+      consumeData = _.map(inputs, function(input) {
+        var inputText, inputTokens, isConsumed, numEqual;
+        inputText = input.getValue();
+        inputTokens = _this.getTokens_(inputText);
+        numEqual = _this.numEqual_(tokens, inputTokens);
+        isConsumed = numEqual >= inputTokens.length;
+        return {
+          input: input,
+          numEqual: numEqual,
+          isConsumed: isConsumed
+        };
+      });
+      bestInputData = _.max(consumeData, function(data) {
+        return data.numEqual;
+      });
+      consumed = _.first(tokens, bestInputData.numEqual);
+      rest = _.rest(tokens, bestInputData.numEqual);
+      if (bestInputData.isConsumed) {
+        nodes = _.union(nodes, [bestInputData.input]);
+        consumedNodes = this.getConsumedNodes_(nodes, rest);
+        return consumedNodes;
+      }
+      return nodes;
     };
 
     Controller.prototype.numEqual_ = function(tokens1, tokens2) {
@@ -302,8 +310,23 @@
       return this.nodeContainer.querySelector(".active");
     };
 
+    Controller.prototype.setPotentialNodes_ = function(nodes) {
+      var node, potentialActive, _i, _j, _len, _len1, _results;
+      potentialActive = this.nodeContainer.querySelectorAll(".potentialActive");
+      for (_i = 0, _len = potentialActive.length; _i < _len; _i++) {
+        node = potentialActive[_i];
+        node.classList.remove("potentialActive");
+      }
+      _results = [];
+      for (_j = 0, _len1 = nodes.length; _j < _len1; _j++) {
+        node = nodes[_j];
+        _results.push(node.classList.add("potentialActive"));
+      }
+      return _results;
+    };
+
     Controller.prototype.setActiveNode_ = function(node) {
-      var active, el, _i, _len;
+      var active, el, outputs, _i, _len;
       active = this.nodeContainer.querySelectorAll(".active");
       for (_i = 0, _len = active.length; _i < _len; _i++) {
         el = active[_i];
@@ -311,7 +334,11 @@
       }
       node.selectNode();
       if (node.classList.contains("output")) {
-        return this.conversation.addOutput(node.getValue());
+        this.conversation.addOutput(node.getValue());
+      }
+      outputs = this.getConnectedOutputs_(node);
+      if (outputs.length > 0) {
+        return this.setActiveNode_(outputs[0]);
       }
     };
 
@@ -427,6 +454,7 @@
 
     Persist.prototype.renderData_ = function(nodes) {
       var id, node, nodeData, other, _i, _j, _k, _len, _len1, _len2, _ref;
+      this.dataRendered = true;
       if ((nodes == null) || (nodes.length === 0)) {
         return;
       }
@@ -457,8 +485,7 @@
           }
         }
       }
-      this.nodeContainer.querySelector("p-node").drawAllConnections();
-      return this.dataRendered = true;
+      return this.nodeContainer.querySelector("p-node").drawAllConnections();
     };
 
     Persist.prototype.findNode_ = function(id) {
@@ -865,8 +892,8 @@
   Conversation.addInput = function(text) {
     var input;
     input = this.querySelector(".conversation-input");
-    input.value = "";
-    return this.addMessage(text, "input");
+    this.addMessage(input.value, "input");
+    return input.value = "";
   };
 
   Conversation.addOutput = function(text) {

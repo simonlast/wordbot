@@ -11,6 +11,7 @@ class Controller
 
   initListeners_: ->
     $(@conversation).on("enter", @textEntered_)
+    $(@conversation).on("input", @textTyped_)
     $(document).on("mousedown", "p-node", @selectNode_)
     $(document).on("input", "p-node", @selectNode_)
 
@@ -20,66 +21,70 @@ class Controller
     @setActiveNode_(e.currentTarget)
 
 
+  textTyped_: (e) =>
+    value = @conversation.getValue()
+    tokens = @getTokens_(value)
+    activeNode = @getActiveNode_()
+
+    consumedNodes = @getConsumedNodes_([activeNode], tokens)
+
+    console.log consumedNodes
+    @setPotentialNodes_(consumedNodes)
+
+
   textEntered_: (e) =>
     value = @conversation.getValue()
     tokens = @getTokens_(value)
-    consumedTokens = @tryConsume_(tokens)
-    console.log "consumedTokens: ", consumedTokens
-
-
-  # Returns tokens left
-  tryConsume_: (tokens) ->
-    # If there's no active node, return an empty array.
     activeNode = @getActiveNode_()
-    return [] if not activeNode?
+    consumedNodes = @getConsumedNodes_([activeNode], tokens)
 
-    outputs = @getConnectedOutputs_(activeNode)
+    if consumedNodes.length > 0
+      @setActiveNode_(consumedNodes[consumedNodes.length-1])
+      @setPotentialNodes_([])
+      @conversation.addInput()
 
-    # If there's an output, consume that and recur.
+
+  getConsumedNodes_: (nodes, tokens) ->
+
+    lastNode = nodes[nodes.length - 1]
+
+    outputs = @getConnectedOutputs_(lastNode)
+
+    # If there are any outputs, consume the first and recur
     if outputs.length > 0
-      @setActiveNode_(outputs[0])
-      return @tryConsume_(tokens)
-
-    else
-
-      # If no tokens left to consume, return an empty array.
-      if tokens.length is 0
-        return []
-
-      inputs = @getConnectedInputs_(activeNode)
-
-      # Find the input that will consume the most tokens.
-      consumeData = _.map inputs, (input) =>
-        inputText = input.getValue()
-        inputTokens = @getTokens_(inputText)
-        numEqual = @numEqual_(tokens, inputTokens)
-        isConsumed = (numEqual >= inputTokens.length)
-        return {input, numEqual, isConsumed}
-
-      bestInputData = _.max consumeData, (data) ->
-        return data.numEqual
-
-      consumed = _.first(tokens, bestInputData.numEqual)
-      rest = _.rest(tokens, bestInputData.numEqual)
-
-      # A node was consumed.
-      if (bestInputData.isConsumed)
-        @setActiveNode_(bestInputData.input)
-
-        reduce = (text, curr) ->
-          text += curr
-
-        inputText = _.reduce(consumed, reduce, "")
-
-        @conversation.addInput(inputText)
-
-        moreConsumed = @tryConsume_(rest)
-        return _.union(consumed, moreConsumed)
+      nodes = _.union(nodes, [outputs[0]])
+      consumedNodes = @getConsumedNodes_(nodes, tokens)
+      return consumedNodes
 
 
-      # Otherwise, nothing was consumed.
-      else
-        return []
+    # If no tokens left to consume, return.
+    if tokens.length is 0
+      return nodes
+
+    inputs = @getConnectedInputs_(lastNode)
+
+    # Find the input that will consume the most tokens.
+    consumeData = _.map inputs, (input) =>
+      inputText = input.getValue()
+      inputTokens = @getTokens_(inputText)
+      numEqual = @numEqual_(tokens, inputTokens)
+      isConsumed = (numEqual >= inputTokens.length)
+      return {input, numEqual, isConsumed}
+
+    bestInputData = _.max consumeData, (data) ->
+      return data.numEqual
+
+    consumed = _.first(tokens, bestInputData.numEqual)
+    rest = _.rest(tokens, bestInputData.numEqual)
+
+    # A node was consumed.
+    if (bestInputData.isConsumed)
+      nodes = _.union(nodes, [bestInputData.input])
+      consumedNodes = @getConsumedNodes_(nodes, rest)
+      return consumedNodes
+
+
+    return nodes
 
 
   numEqual_: (tokens1, tokens2) ->
@@ -126,6 +131,17 @@ class Controller
     return @nodeContainer.querySelector(".active")
 
 
+  setPotentialNodes_: (nodes) ->
+    potentialActive = @nodeContainer.querySelectorAll(".potentialActive")
+
+    for node in potentialActive
+      node.classList.remove("potentialActive")
+
+    for node in nodes
+      node.classList.add("potentialActive")
+
+
+
   setActiveNode_: (node) ->
     active = @nodeContainer.querySelectorAll(".active")
     for el in active
@@ -135,6 +151,15 @@ class Controller
 
     if node.classList.contains("output")
       @conversation.addOutput(node.getValue())
+
+
+    # If there are any outputs, recur.
+    outputs = @getConnectedOutputs_(node)
+
+    if outputs.length > 0
+      @setActiveNode_(outputs[0])
+
+
 
 
 module.exports = Controller

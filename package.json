@@ -1,0 +1,33 @@
+{
+  "name": "wordbot",
+  "version": "0.0.0",
+  "description": "webchord ========",
+  "main": "tools/server.coffee",
+  "dependencies": {
+    "browserify": "~2.18.1",
+    "coffee": "~0.0.1",
+    "connect": "~2.7.6",
+    "express": "~3.2.0",
+    "node-watch": "~0.3.3",
+    "peer": "~0.1.6",
+    "socket.io": "~0.9.16",
+    "through": "~2.3.4",
+    "consolidate": "~0.9.1",
+    "underscore": "~1.5.2",
+    "shortid": "~2.0.0"
+  },
+  "devDependencies": {
+    "coffee-script": "~1.6.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/simonlast/webchord.git"
+  },
+  "author": "Simon Last",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "665655bba0319ebf97e29ba6092d9fa3277bf1d7"
+}

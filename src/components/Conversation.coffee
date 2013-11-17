@@ -17,6 +17,11 @@ Conversation.getValue = ->
   return @querySelector(".conversation-input").value
 
 
+Conversation.clear = ->
+  log = @querySelector(".log")
+  log.innerHTML = ""
+
+
 Conversation.addInput = (text) ->
   input = @querySelector(".conversation-input")
   input.value = ""

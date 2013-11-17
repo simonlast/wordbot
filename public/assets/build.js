@@ -154,6 +154,7 @@
     };
 
     Controller.prototype.selectNode_ = function(e) {
+      this.conversation.clear();
       return this.setActiveNode_(e.target);
     };
 
@@ -265,9 +266,9 @@
       active = this.nodeContainer.querySelectorAll(".active");
       for (_i = 0, _len = active.length; _i < _len; _i++) {
         el = active[_i];
-        el.classList.remove("active");
+        el.deselect();
       }
-      node.classList.add("active");
+      node.select();
       if (node.classList.contains("output")) {
         return this.conversation.addOutput(node.getValue());
       }
@@ -581,13 +582,11 @@
 
 
   Node.select = function() {
-    var el, others, _i, _len;
-    others = this.parentElement.querySelectorAll(".active");
-    for (_i = 0, _len = others.length; _i < _len; _i++) {
-      el = others[_i];
-      el.classList.remove("active");
-    }
     return this.classList.add("active");
+  };
+
+  Node.deselect = function() {
+    return this.classList.remove("active");
   };
 
   Node.drawConnections = function() {
@@ -645,6 +644,12 @@
 
   Conversation.getValue = function() {
     return this.querySelector(".conversation-input").value;
+  };
+
+  Conversation.clear = function() {
+    var log;
+    log = this.querySelector(".log");
+    return log.innerHTML = "";
   };
 
   Conversation.addInput = function(text) {

@@ -16,6 +16,7 @@ class Controller
 
 
   selectNode_: (e) =>
+    @conversation.clear()
     @setActiveNode_(e.target)
 
 
@@ -129,9 +130,9 @@ class Controller
     active = @nodeContainer.querySelectorAll(".active")
 
     for el in active
-      el.classList.remove("active")
+      el.deselect()
 
-    node.classList.add("active")
+    node.select()
 
 
     if node.classList.contains("output")

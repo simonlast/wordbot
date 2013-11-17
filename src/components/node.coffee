@@ -123,11 +123,11 @@ Node.connectDragEnd_ = (e) ->
 =========================================================================== ###
 
 Node.select = ->
-  others = @parentElement.querySelectorAll(".active")
-  for el in others
-    el.classList.remove("active")
-
   @classList.add("active")
+
+
+Node.deselect = ->
+  @classList.remove("active")
 
 
 Node.drawConnections = ->

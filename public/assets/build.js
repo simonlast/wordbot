@@ -550,6 +550,8 @@
     return [box.left + box.width / 2, box.top + box.height / 2];
   };
 
+  window.getElMiddle = util.getElMiddle;
+
   module.exports = util;
 
 }).call(this);
@@ -797,7 +799,10 @@
 
   Node.mouseDown_ = function(e) {
     if (e.target === e.currentTarget) {
-      return e.preventDefault();
+      e.preventDefault();
+      return this.$el.css({
+        scale: 1
+      });
     }
   };
 
@@ -830,7 +835,10 @@
 
   Node.dragEnd_ = function(e) {
     this.dragStartOffset = null;
-    return this.drawAllConnections(this.nodeId);
+    this.drawAllConnections(this.nodeId);
+    return this.$el.css({
+      transform: ""
+    });
   };
 
   /* ===========================================================================

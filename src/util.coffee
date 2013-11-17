@@ -21,4 +21,7 @@ util.getElMiddle = (el) ->
   return [box.left + box.width/2, box.top + box.height/2]
 
 
+window.getElMiddle = util.getElMiddle
+
+
 module.exports = util

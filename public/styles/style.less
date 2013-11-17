@@ -143,12 +143,12 @@ p-node{
 }
 
 p-node.active{
-  box-shadow: 0 0 24px rgb(100, 100, 100);
+  box-shadow: 0 0 24px rgba(100, 100, 100, .7);
   .scale(1.05);
 }
 
 p-node.potentialActive{
-  box-shadow: 0 0 24px rgb(100, 100, 100);
+  box-shadow: 0 0 24px rgba(100, 100, 100, .7);
   .scale(1.05);
 }
 
@@ -194,7 +194,7 @@ p-conversation{
   width: 100%;
   height: 100%;
   background-color: @dark;
-  box-shadow: 10px -12px 32px rgba(0,0,0,.6);
+  box-shadow: 10px -12px 32px rgba(0,0,0,.5);
 }
 
 p-conversation .conversation-input{
@@ -204,7 +204,7 @@ p-conversation .conversation-input{
   width: 100%;
   font-size: 24px;
   margin: 0;
-  padding: 6px;
+  padding: 8px;
   background-color: @secondary;
   color: @text;
   border: none;
@@ -216,7 +216,7 @@ p-conversation .conversation-input{
 p-conversation .log{
   height: 100%;
   overflow: scroll;
-  padding-bottom: 42px;
+  padding-bottom: 48px;
 }
 
 p-conversation .log p{
@@ -225,6 +225,7 @@ p-conversation .log p{
   padding: 8px;
   border-radius: 8px;
   min-height: 34px;
+  box-shadow: 0 0 12px rgba(100, 100, 100, .2);
 }
 
 p-conversation .log .output{

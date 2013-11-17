@@ -141,6 +141,10 @@ Node.mouseDown_ = (e) ->
   if e.target is e.currentTarget
     e.preventDefault()
 
+    # Force scale to be 1 before dragging
+    @$el.css({scale: 1})
+
+
 
 ### ===========================================================================
 
@@ -168,6 +172,9 @@ Node.dragMove_ = (e) ->
 Node.dragEnd_ = (e) ->
   @dragStartOffset = null
   @drawAllConnections(@nodeId)
+
+  # Restore previous scale
+  @$el.css({transform: ""})
 
 
 

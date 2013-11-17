@@ -7,7 +7,7 @@ observerOpts = {
   subtree       : true
 }
 
-persistWait = 100
+persistWait = 250
 urlRegex = /\/(.*)/
 
 
@@ -54,13 +54,12 @@ class Persist
     data = @serializeAll_()
     if not _.isEqual(data, @lastData)
       @lastData = data
-      console.log "saving data"
 
       url = @getPersisUrl_()
       if url?
         db.set url, data, (data) ->
           if data.err?
-            console.log data.err
+            console.log "save error: ", data.err
 
 
   serializeAll_: ->
@@ -105,6 +104,7 @@ class Persist
         top: nodeData.position.top + "px"
       })
 
+      # Explicit setup
       node.setup()
 
 
@@ -122,9 +122,6 @@ class Persist
 
     @nodeContainer.querySelector("p-node").drawAllConnections()
     @dataRendered = true
-
-
-
 
 
   findNode_: (id) ->

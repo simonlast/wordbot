@@ -14,7 +14,7 @@ html = """
 
 =========================================================================== ###
 
-# Nodes must be explicity setup
+# Nodes must be explicity set up
 Node.setup = ->
   @$el = $(this)
   @innerHTML = html

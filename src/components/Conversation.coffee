@@ -7,7 +7,7 @@ html = """
   <input type="text" class="conversation-input" placeholder="Type to talk">
 """
 
-Conversation.insertedCallback = ->
+Conversation.readyCallback = ->
   @$el = $(this)
   @innerHTML = html
   @initListeners_()

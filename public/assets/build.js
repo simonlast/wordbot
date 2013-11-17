@@ -337,7 +337,7 @@
     subtree: true
   };
 
-  persistWait = 100;
+  persistWait = 250;
 
   urlRegex = /\/(.*)/;
 
@@ -387,12 +387,11 @@
       data = this.serializeAll_();
       if (!_.isEqual(data, this.lastData)) {
         this.lastData = data;
-        console.log("saving data");
         url = this.getPersisUrl_();
         if (url != null) {
           return db.set(url, data, function(data) {
             if (data.err != null) {
-              return console.log(data.err);
+              return console.log("save error: ", data.err);
             }
           });
         }
@@ -847,7 +846,7 @@
 
   html = "<div class=\"log\"></div>\n<input type=\"text\" class=\"conversation-input\" placeholder=\"Type to talk\">";
 
-  Conversation.insertedCallback = function() {
+  Conversation.readyCallback = function() {
     this.$el = $(this);
     this.innerHTML = html;
     return this.initListeners_();

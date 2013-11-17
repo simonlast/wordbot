@@ -24,7 +24,7 @@ Conversation.clear = ->
 
 Conversation.addInput = (text) ->
   input = @querySelector(".conversation-input")
-  @addMessage(input.value, "input")
+  @addMessage(text, "input")
   input.value = ""
 
 

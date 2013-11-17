@@ -27,8 +27,8 @@ class Controller
     activeNode = @getActiveNode_()
 
     consumedNodes = @getConsumedNodes_([activeNode], tokens)
-
     console.log consumedNodes
+
     @setPotentialNodes_(consumedNodes)
 
 
@@ -41,18 +41,22 @@ class Controller
     if consumedNodes.length > 0
       @setActiveNode_(consumedNodes[consumedNodes.length-1])
       @setPotentialNodes_([])
-      @conversation.addInput()
+      for node in consumedNodes
+        if node.classList.contains("output")
+          @conversation.addOutput(node.getValue())
+        else
+          @conversation.addInput(node.getValue())
 
 
   getConsumedNodes_: (nodes, tokens) ->
-
     lastNode = nodes[nodes.length - 1]
 
     outputs = @getConnectedOutputs_(lastNode)
 
     # If there are any outputs, consume the first and recur
     if outputs.length > 0
-      nodes = _.union(nodes, [outputs[0]])
+      nodes = _.clone(nodes)
+      nodes.push(outputs[0])
       consumedNodes = @getConsumedNodes_(nodes, tokens)
       return consumedNodes
 
@@ -79,7 +83,8 @@ class Controller
 
     # A node was consumed.
     if (bestInputData.isConsumed)
-      nodes = _.union(nodes, [bestInputData.input])
+      nodes = _.clone(nodes)
+      nodes.push(bestInputData.input)
       consumedNodes = @getConsumedNodes_(nodes, rest)
       return consumedNodes
 

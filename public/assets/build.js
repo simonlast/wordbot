@@ -212,7 +212,7 @@
     };
 
     Controller.prototype.textEntered_ = function(e) {
-      var activeNode, consumedNodes, tokens, value;
+      var activeNode, consumedNodes, node, tokens, value, _i, _len, _results;
       value = this.conversation.getValue();
       tokens = this.getTokens_(value);
       activeNode = this.getActiveNode_();
@@ -220,7 +220,16 @@
       if (consumedNodes.length > 0) {
         this.setActiveNode_(consumedNodes[consumedNodes.length - 1]);
         this.setPotentialNodes_([]);
-        return this.conversation.addInput();
+        _results = [];
+        for (_i = 0, _len = consumedNodes.length; _i < _len; _i++) {
+          node = consumedNodes[_i];
+          if (node.classList.contains("output")) {
+            _results.push(this.conversation.addOutput(node.getValue()));
+          } else {
+            _results.push(this.conversation.addInput(node.getValue()));
+          }
+        }
+        return _results;
       }
     };
 
@@ -230,7 +239,8 @@
       lastNode = nodes[nodes.length - 1];
       outputs = this.getConnectedOutputs_(lastNode);
       if (outputs.length > 0) {
-        nodes = _.union(nodes, [outputs[0]]);
+        nodes = _.clone(nodes);
+        nodes.push(outputs[0]);
         consumedNodes = this.getConsumedNodes_(nodes, tokens);
         return consumedNodes;
       }
@@ -256,7 +266,8 @@
       consumed = _.first(tokens, bestInputData.numEqual);
       rest = _.rest(tokens, bestInputData.numEqual);
       if (bestInputData.isConsumed) {
-        nodes = _.union(nodes, [bestInputData.input]);
+        nodes = _.clone(nodes);
+        nodes.push(bestInputData.input);
         consumedNodes = this.getConsumedNodes_(nodes, rest);
         return consumedNodes;
       }
@@ -892,7 +903,7 @@
   Conversation.addInput = function(text) {
     var input;
     input = this.querySelector(".conversation-input");
-    this.addMessage(input.value, "input");
+    this.addMessage(text, "input");
     return input.value = "";
   };
 

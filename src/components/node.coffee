@@ -3,7 +3,7 @@ util = require("../util.coffee")
 Node = Object.create(HTMLElement.prototype)
 
 html = """
-  <input class="node-text"></input>
+  <input class="node-text">
   <button class="swap-type">↺</button>
 """
 
@@ -80,19 +80,20 @@ Node.dragEnd_ = (e) ->
 
 
 Node.connectDragStart_ = (e) ->
-  nib = e.target
-  $nib = $(nib)
+  $dragTarget = $(e.target)
+  $dragTarget = $dragTarget.closest(".canDragstart")
+  dragTarget = $dragTarget[0]
 
-  if $nib.is(".nib")
+  if $dragTarget.length > 0
     offset = @$el.offset()
     width = @$el.outerWidth()
     height = @$el.outerHeight()
     @connectStartOffset = [offset.left + width/2, offset.top + height/2]
 
-    if nib.info?.to?
+    if dragTarget.info?.to?
       # Could be either from or to
-      @disconnectFrom(nib.info.to)
-      @disconnectFrom(nib.info.from)
+      @disconnectFrom(dragTarget.info.to)
+      @disconnectFrom(dragTarget.info.from)
       @drawConnections(@nodeId)
 
 
@@ -122,11 +123,11 @@ Node.connectDragEnd_ = (e) ->
 
 =========================================================================== ###
 
-Node.select = ->
+Node.selectNode = ->
   @classList.add("active")
 
 
-Node.deselect = ->
+Node.deselectNode = ->
   @classList.remove("active")
 
 
@@ -136,7 +137,7 @@ Node.drawConnections = ->
     @connectionLayer.addLineEl(@nodeId, this, other)
 
   elBox = util.getElOuterBox(this)
-  @connectionLayer.addNib(@nodeId, elBox.left + elBox.width/2, elBox.top + elBox.height, 30)
+  @connectionLayer.addNib(@nodeId, elBox.left + elBox.width/2, elBox.top + elBox.height, 25)
 
 
 Node.drawAllConnections = ->

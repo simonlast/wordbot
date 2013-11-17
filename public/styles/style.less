@@ -97,31 +97,35 @@ p-connection-layer{
   position: absolute;
   top: 0;
   left: 0;
+  .noselect;
 }
 
-p-connection-layer g{
-  opacity: .5;
+p-connection-layer .lineGroup{
+  opacity: .4;
+  .ease;
 }
 
+p-connection-layer .lineGroup:hover{
+  opacity: .6;
+}
 
 p-connection-layer line{
   stroke: @connections;
   stroke-width: 12px;
   stroke-linecap: round;
-  -webkit-transition: stroke 200ms ease;
-}
-
-p-connection-layer circle:hover{
-  opacity: 1;
+  cursor: -webkit-grab;
 }
 
 p-connection-layer circle{
   stroke: none;
   fill: @connections;
-  -webkit-transition: stroke 200ms ease;
   cursor: -webkit-grab;
-  opacity: .7;
+  opacity: .4;
   .ease;
+}
+
+p-connection-layer circle:hover{
+  opacity: .6;
 }
 
 p-node{
@@ -150,7 +154,7 @@ p-node .node-text{
   width: 100%;
   font-size: 16px;
   margin: 0;
-  padding: 4px;
+  padding: 6px;
   background-color: @secondary;
   color: @text;
   border: none;
@@ -159,6 +163,8 @@ p-node .node-text{
 
   font-family: Helvetica;
   font-weight: 100;
+
+  resize: none;
 }
 
 p-node .swap-type{
@@ -213,14 +219,14 @@ p-conversation .log p{
   min-height: 34px;
 }
 
-p-conversation .log .input{
-  background-color: @secondary;
-  margin-right: 40%;
-}
-
 p-conversation .log .output{
   background-color: @outputColor;
   color: @secondary;
+  margin-right: 40%;
+}
+
+p-conversation .log .input{
+  background-color: @secondary;
   text-align: right;
   margin-left: 40%;
 }

@@ -17,7 +17,7 @@ class Controller
 
   selectNode_: (e) =>
     @conversation.clear()
-    @setActiveNode_(e.target)
+    @setActiveNode_(e.currentTarget)
 
 
   textEntered_: (e) =>
@@ -130,9 +130,9 @@ class Controller
     active = @nodeContainer.querySelectorAll(".active")
 
     for el in active
-      el.deselect()
+      el.deselectNode()
 
-    node.select()
+    node.selectNode()
 
 
     if node.classList.contains("output")

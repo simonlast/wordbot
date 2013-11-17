@@ -77,6 +77,7 @@
       newEvent.pageX = e.pageX;
       newEvent.pageY = e.pageY;
       newEvent.target = e.target;
+      newEvent.originalEvent = e;
       return $(target).trigger(newEvent);
     };
 
@@ -155,7 +156,7 @@
 
     Controller.prototype.selectNode_ = function(e) {
       this.conversation.clear();
-      return this.setActiveNode_(e.target);
+      return this.setActiveNode_(e.currentTarget);
     };
 
     Controller.prototype.textEntered_ = function(e) {
@@ -266,9 +267,9 @@
       active = this.nodeContainer.querySelectorAll(".active");
       for (_i = 0, _len = active.length; _i < _len; _i++) {
         el = active[_i];
-        el.deselect();
+        el.deselectNode();
       }
-      node.select();
+      node.selectNode();
       if (node.classList.contains("output")) {
         return this.conversation.addOutput(node.getValue());
       }
@@ -360,12 +361,14 @@
   };
 
   ConnectionLayer.addLineEl = function(id, fromEl, toEl) {
-    var fromMiddle, toMiddle;
+    var fromMiddle, lineGroup, toMiddle;
     fromMiddle = util.getElMiddle(fromEl);
     toMiddle = util.getElMiddle(toEl);
-    this.addLine(id, fromMiddle, toMiddle);
-    this.addTip(id, fromEl, toEl);
-    return this.addTip(id, toEl, fromEl);
+    lineGroup = this.addLine(id, fromMiddle, toMiddle);
+    return lineGroup.info = {
+      from: fromEl,
+      to: toEl
+    };
   };
 
   ConnectionLayer.addNib = function(id, x, y, rad) {
@@ -379,61 +382,27 @@
     circle.setAttribute("cy", y);
     circle.setAttribute("r", rad);
     circle.classList.add("nib");
+    circle.classList.add("canDragstart");
     return group.appendChild(circle);
   };
 
-  ConnectionLayer.addTip = function(id, fromEl, toEl) {
-    var from, fromBox, fromMiddle, intersections, lineTo, lines, nearest, nib, to, toMiddle, valid;
-    fromBox = util.getElOuterBox(fromEl);
-    fromMiddle = util.getElMiddle(fromEl);
-    toMiddle = util.getElMiddle(toEl);
-    from = $V(fromMiddle);
-    to = $V(toMiddle);
-    lineTo = $L(from, to.subtract(from));
-    lines = [$L($V([fromBox.left, fromBox.top]), $V([0, 1])), $L($V([fromBox.left, fromBox.top]), $V([1, 0])), $L($V([fromBox.left + fromBox.width, fromBox.top]), $V([0, 1])), $L($V([fromBox.left, fromBox.top + fromBox.height]), $V([1, 0]))];
-    intersections = _.map(lines, function(line) {
-      return line.intersectionWith(lineTo);
-    });
-    valid = _.filter(intersections, function(intersection) {
-      var v;
-      if (intersection == null) {
-        return;
-      }
-      v = intersection.elements;
-      if (v[0] < fromBox.left || v[0] > fromBox.left + fromBox.width) {
-        return false;
-      }
-      if (v[1] < fromBox.top || v[1] > fromBox.top + fromBox.height) {
-        return false;
-      }
-      return true;
-    });
-    nearest = _.min(valid, function(intersection) {
-      intersection.elements.splice(2, 1);
-      return intersection.distanceFrom(to);
-    });
-    nib = this.addNib(id, nearest.elements[0], nearest.elements[1]);
-    return nib.info = {
-      from: fromEl,
-      to: toEl
-    };
-  };
-
   ConnectionLayer.addLine = function(id, from, to) {
-    var group, idGroup, sub;
+    var idGroup, lineGroup, sub;
     idGroup = this.users[id];
-    group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    idGroup.appendChild(group);
-    group.classList.add("lineGroup");
-    group.appendChild(this.makeLineSimple(from, to));
+    lineGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    idGroup.appendChild(lineGroup);
+    lineGroup.classList.add("lineGroup");
+    lineGroup.classList.add("canDragstart");
+    lineGroup.appendChild(this.makeLineSimple(from, to));
     from = $V(from);
     to = $V(to);
     sub = from.subtract(to);
     sub = sub.rotate(Math.PI / 2, $V([0, 0]));
     sub = sub.toUnitVector();
     sub = sub.multiply(12);
-    group.appendChild(this.makeLineSimple(from.add(sub).elements, to.elements));
-    return group.appendChild(this.makeLineSimple(from.subtract(sub).elements, to.elements));
+    lineGroup.appendChild(this.makeLineSimple(from.add(sub).elements, to.elements));
+    lineGroup.appendChild(this.makeLineSimple(from.subtract(sub).elements, to.elements));
+    return lineGroup;
   };
 
   ConnectionLayer.clear = function(id) {
@@ -466,7 +435,7 @@
 
   Node = Object.create(HTMLElement.prototype);
 
-  html = "<input class=\"node-text\"></input>\n<button class=\"swap-type\">↺</button>";
+  html = "<input class=\"node-text\">\n<button class=\"swap-type\">↺</button>";
 
   Node.insertedCallback = function() {
     this.$el = $(this);
@@ -539,17 +508,18 @@
 
 
   Node.connectDragStart_ = function(e) {
-    var $nib, height, nib, offset, width, _ref;
-    nib = e.target;
-    $nib = $(nib);
-    if ($nib.is(".nib")) {
+    var $dragTarget, dragTarget, height, offset, width, _ref;
+    $dragTarget = $(e.target);
+    $dragTarget = $dragTarget.closest(".canDragstart");
+    dragTarget = $dragTarget[0];
+    if ($dragTarget.length > 0) {
       offset = this.$el.offset();
       width = this.$el.outerWidth();
       height = this.$el.outerHeight();
       this.connectStartOffset = [offset.left + width / 2, offset.top + height / 2];
-      if (((_ref = nib.info) != null ? _ref.to : void 0) != null) {
-        this.disconnectFrom(nib.info.to);
-        this.disconnectFrom(nib.info.from);
+      if (((_ref = dragTarget.info) != null ? _ref.to : void 0) != null) {
+        this.disconnectFrom(dragTarget.info.to);
+        this.disconnectFrom(dragTarget.info.from);
         return this.drawConnections(this.nodeId);
       }
     }
@@ -581,11 +551,11 @@
   */
 
 
-  Node.select = function() {
+  Node.selectNode = function() {
     return this.classList.add("active");
   };
 
-  Node.deselect = function() {
+  Node.deselectNode = function() {
     return this.classList.remove("active");
   };
 
@@ -598,7 +568,7 @@
       this.connectionLayer.addLineEl(this.nodeId, this, other);
     }
     elBox = util.getElOuterBox(this);
-    return this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 30);
+    return this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 25);
   };
 
   Node.drawAllConnections = function() {

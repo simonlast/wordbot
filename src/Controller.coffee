@@ -19,6 +19,7 @@ class Controller
   selectNode_: (e) =>
     @conversation.clear()
     @setActiveNode_(e.currentTarget)
+    @setPotentialNodes_([])
 
 
   textTyped_: (e) =>

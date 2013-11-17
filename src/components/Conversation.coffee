@@ -21,6 +21,9 @@ Conversation.clear = ->
   log = @querySelector(".log")
   log.innerHTML = ""
 
+  input = @querySelector(".conversation-input")
+  input.value = ""
+
 
 Conversation.addInput = (text) ->
   input = @querySelector(".conversation-input")

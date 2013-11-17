@@ -189,7 +189,8 @@
 
     Controller.prototype.selectNode_ = function(e) {
       this.conversation.clear();
-      return this.setActiveNode_(e.currentTarget);
+      this.setActiveNode_(e.currentTarget);
+      return this.setPotentialNodes_([]);
     };
 
     Controller.prototype.textTyped_ = function(e) {
@@ -948,9 +949,11 @@
   };
 
   Conversation.clear = function() {
-    var log;
+    var input, log;
     log = this.querySelector(".log");
-    return log.innerHTML = "";
+    log.innerHTML = "";
+    input = this.querySelector(".conversation-input");
+    return input.value = "";
   };
 
   Conversation.addInput = function(text) {

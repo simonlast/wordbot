@@ -117,6 +117,16 @@ Node.drawConnections = ->
   @connectionLayer.addNib(@nodeId, elBox.left + elBox.width/2, elBox.top + elBox.height, 25)
 
 
+# Draw this node's connections, as well as all nodes connected to it.
+Node.drawRelatedConnections = ->
+  all = document.querySelectorAll("p-node")
+  for node in all
+    if this in node.connectedTo
+      node.drawConnections()
+
+  @drawConnections()
+
+
 Node.drawAllConnections = ->
   all = document.querySelectorAll("p-node")
   for node in all
@@ -177,7 +187,7 @@ Node.dragMove_ = (e) ->
       left: (e.pageX - @dragStartOffset[0]) + "px"
       top: (e.pageY - @dragStartOffset[1]) + "px"
     })
-    @drawAllConnections(@nodeId)
+    @drawRelatedConnections(@nodeId)
 
 
 Node.dragEnd_ = (e) ->

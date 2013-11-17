@@ -664,7 +664,8 @@
 
 },{"../util.coffee":8}],10:[function(require,module,exports){
 (function() {
-  var Node, html, util;
+  var Node, html, util,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   util = require("../util.coffee");
 
@@ -776,6 +777,18 @@
     return this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 25);
   };
 
+  Node.drawRelatedConnections = function() {
+    var all, node, _i, _len;
+    all = document.querySelectorAll("p-node");
+    for (_i = 0, _len = all.length; _i < _len; _i++) {
+      node = all[_i];
+      if (__indexOf.call(node.connectedTo, this) >= 0) {
+        node.drawConnections();
+      }
+    }
+    return this.drawConnections();
+  };
+
   Node.drawAllConnections = function() {
     var all, node, _i, _len, _results;
     all = document.querySelectorAll("p-node");
@@ -847,7 +860,7 @@
         left: (e.pageX - this.dragStartOffset[0]) + "px",
         top: (e.pageY - this.dragStartOffset[1]) + "px"
       });
-      return this.drawAllConnections(this.nodeId);
+      return this.drawRelatedConnections(this.nodeId);
     }
   };
 

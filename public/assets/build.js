@@ -175,16 +175,23 @@
       this.textEntered_ = __bind(this.textEntered_, this);
       this.textTyped_ = __bind(this.textTyped_, this);
       this.selectNode_ = __bind(this.selectNode_, this);
+      this.toggleEditing_ = __bind(this.toggleEditing_, this);
       this.nodeContainer = document.querySelector(".node-container");
       this.conversation = document.querySelector("p-conversation");
       this.initListeners_();
     }
 
     Controller.prototype.initListeners_ = function() {
+      $(document).on("click", ".editToggle", this.toggleEditing_);
       $(this.conversation).on("enter", this.textEntered_);
       $(this.conversation).on("input", this.textTyped_);
       $(document).on("mousedown", "p-node", this.selectNode_);
       return $(document).on("input", "p-node", this.selectNode_);
+    };
+
+    Controller.prototype.toggleEditing_ = function(e) {
+      document.querySelector(".conversation").classList.toggle("conversation-mode");
+      return this.conversation.scrollToBottom();
     };
 
     Controller.prototype.selectNode_ = function(e) {
@@ -690,7 +697,6 @@
   Node.setup = function() {
     this.$el = $(this);
     this.innerHTML = html;
-    this.querySelector(".node-text").select();
     this.connectionLayer = document.querySelector("p-connection-layer");
     this.nodeId = this.getAttribute("node-id");
     this.layerGroup = this.connectionLayer.registerUser(this.nodeId);
@@ -936,7 +942,7 @@
 
   Conversation = Object.create(HTMLElement.prototype);
 
-  html = "<div class=\"log\"></div>\n<input type=\"text\" class=\"conversation-input\" placeholder=\"Type to talk\">";
+  html = "<div class=\"log\"></div>\n<input type=\"text\" class=\"conversation-input\" placeholder=\"Type to talk\" autofocus>";
 
   Conversation.readyCallback = function() {
     this.$el = $(this);
@@ -967,15 +973,21 @@
     return this.addMessage(text, "output");
   };
 
+  Conversation.scrollToBottom = function() {
+    var $log, log;
+    log = this.querySelector(".log");
+    $log = $(log);
+    return $log.scrollTop(log.scrollHeight);
+  };
+
   Conversation.addMessage = function(text, type) {
-    var $log, log, p;
+    var log, p;
     log = this.querySelector(".log");
     p = document.createElement("p");
     p.classList.add(type);
     p.innerText = text;
     log.appendChild(p);
-    $log = $(log);
-    return $log.scrollTop(log.scrollHeight);
+    return this.scrollToBottom();
   };
 
   Conversation.initListeners_ = function() {

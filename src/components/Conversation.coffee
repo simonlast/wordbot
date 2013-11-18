@@ -4,7 +4,7 @@ Conversation = Object.create(HTMLElement.prototype)
 
 html = """
   <div class="log"></div>
-  <input type="text" class="conversation-input" placeholder="Type to talk">
+  <input type="text" class="conversation-input" placeholder="Type to talk" autofocus>
 """
 
 Conversation.readyCallback = ->
@@ -35,6 +35,12 @@ Conversation.addOutput = (text) ->
   @addMessage(text, "output")
 
 
+Conversation.scrollToBottom = ->
+  log = @querySelector(".log")
+  $log = $(log)
+  $log.scrollTop(log.scrollHeight)
+
+
 Conversation.addMessage = (text, type) ->
   log = @querySelector(".log")
   p = document.createElement("p")
@@ -43,8 +49,7 @@ Conversation.addMessage = (text, type) ->
   log.appendChild(p)
 
   # Auto-scroll
-  $log = $(log)
-  $log.scrollTop(log.scrollHeight)
+  @scrollToBottom()
 
 
 Conversation.initListeners_ = ->

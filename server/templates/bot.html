@@ -3,6 +3,7 @@
   <head>
     <title>Wordbot</title>
     <link type="text/css" rel="stylesheet" href="/styles/style.css"/>
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <link rel="shortcut icon" href="http://www.gravatar.com/avatar/3b964d84fcfbcdf59089c8bd7309f0b7.ico" />
   </head>
   <body>
@@ -12,9 +13,11 @@
       <div class="node-container"></div>
     </div>
 
-    <div class="conversation">
+    <div class="conversation conversation-mode">
       <p-conversation></p-conversation>
     </div>
+
+    <button class="editToggle"><i class="fa fa-pencil-square-o"></i></button>
 
     <script type="text/javascript">
       window.bootstrapData = <%= data %>;

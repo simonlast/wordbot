@@ -10,10 +10,17 @@ class Controller
 
 
   initListeners_: ->
+    $(document).on("click", ".editToggle", @toggleEditing_)
+
     $(@conversation).on("enter", @textEntered_)
     $(@conversation).on("input", @textTyped_)
     $(document).on("mousedown", "p-node", @selectNode_)
     $(document).on("input", "p-node", @selectNode_)
+
+
+  toggleEditing_: (e) =>
+    document.querySelector(".conversation").classList.toggle("conversation-mode")
+    @conversation.scrollToBottom()
 
 
   selectNode_: (e) =>

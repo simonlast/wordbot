@@ -20,9 +20,6 @@ Node.setup = ->
   @$el = $(this)
   @innerHTML = html
 
-  # Auto-select input
-  @querySelector(".node-text").select()
-
   @connectionLayer = document.querySelector("p-connection-layer")
   @nodeId = @getAttribute("node-id")
   @layerGroup = @connectionLayer.registerUser(@nodeId)

@@ -37,9 +37,6 @@ class Controller
     consumedNodes = @getConsumedNodes_([activeNode], tokens)
     console.log consumedNodes
 
-    # Ignore the first node
-    consumedNodes.splice(0,1)
-
     @setPotentialNodes_(consumedNodes)
 
 
@@ -156,12 +153,12 @@ class Controller
 
   setPotentialNodes_: (nodes) ->
     potentialActive = @nodeContainer.querySelectorAll(".potentialActive")
-
     for node in potentialActive
       node.deselectPotentialNode()
 
-    for node in nodes
-      node.selectPotentialNode()
+    for node, index in nodes
+      nextNode = nodes[index+1]
+      node.selectPotentialNode(nextNode)
 
 
 

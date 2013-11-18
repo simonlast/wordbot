@@ -85,6 +85,9 @@ p-connection-layer .lineGroup {
 p-connection-layer .lineGroup:hover {
   opacity: .6;
 }
+p-connection-layer .lineGroup.potentialActive {
+  opacity: 1;
+}
 p-connection-layer line {
   stroke: #c2cbce;
   stroke-width: 12px;

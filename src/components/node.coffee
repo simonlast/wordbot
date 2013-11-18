@@ -99,12 +99,25 @@ Node.deselectNode = ->
   @classList.remove("active")
 
 
-Node.selectPotentialNode = ->
+Node.selectPotentialNode = (other) ->
   @classList.add("potentialActive")
+
+  lines = $(@layerGroup).find(".lineGroup")
+
+  otherLine = _.find lines, (line) ->
+    return line.info?.to is other
+
+  if otherLine?
+    otherLine.classList.add("potentialActive")
 
 
 Node.deselectPotentialNode = ->
   @classList.remove("potentialActive")
+
+  lines = $(@layerGroup).find(".lineGroup")
+
+  for line in lines
+    line.classList.remove("potentialActive")
 
 
 Node.drawConnections = ->

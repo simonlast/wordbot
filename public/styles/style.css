@@ -58,8 +58,12 @@ body {
   border: none;
   outline: none;
   color: #52737b;
-  font-size: 32px;
+  font-size: 38px;
   cursor: pointer;
+  -webkit-transition: all 100ms ease-in-out;
+  -moz-transition: all 100ms ease-in-out;
+  -o-transition: all 100ms ease-in-out;
+  -ms-transition: all 100ms ease-in-out;
 }
 p-connection-layer {
   width: 100%;
@@ -303,4 +307,10 @@ p-conversation .log .input:after {
 .conversation.conversation-mode .conversation-input {
   font-size: 32px;
   padding: 12px;
+}
+.conversation.conversation-mode .editToggle {
+  -moz-transform: rotate(-180deg);
+  -webkit-transform: rotate(-180deg);
+  -o-transform: rotate(-180deg);
+  -ms-transform: rotate(-180deg);
 }

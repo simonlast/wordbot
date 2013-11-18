@@ -403,6 +403,11 @@
       this.loadData_();
     }
 
+    Persist.prototype.toggleEditing_ = function() {
+      document.querySelector(".conversation").classList.toggle("conversation-mode");
+      return this.conversation.scrollToBottom();
+    };
+
     /* ===========================================================================
     
       Persisting data
@@ -471,7 +476,8 @@
       if (data != null) {
         return this.renderData_(data);
       } else {
-        return this.dataRendered = true;
+        this.dataRendered = true;
+        return this.toggleEditing_();
       }
     };
 

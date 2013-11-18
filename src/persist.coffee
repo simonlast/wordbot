@@ -23,6 +23,11 @@ class Persist
     @loadData_()
 
 
+  toggleEditing_: ->
+    document.querySelector(".conversation").classList.toggle("conversation-mode")
+    @conversation.scrollToBottom()
+
+
   ### ===========================================================================
 
     Persisting data
@@ -85,6 +90,9 @@ class Persist
       @renderData_(data)
     else
       @dataRendered = true
+
+      # If there is no data, go into editing mode.
+      @toggleEditing_()
 
 
 

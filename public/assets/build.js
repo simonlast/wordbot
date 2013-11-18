@@ -151,7 +151,8 @@
           left: (e.pageX - box.width / 2) + "px",
           top: (e.pageY - box.height / 2) + "px"
         });
-        return node.setup();
+        node.setup();
+        return node.querySelector("input").select();
       }
     };
 
@@ -706,13 +707,14 @@
   };
 
   Node.initListeners_ = function() {
+    this.$layerGroup = $(this.layerGroup);
     this.$el.on("mousedown", this.mouseDown_.bind(this));
+    this.$layerGroup.on("mousedown", this.mouseDownLayer_.bind(this));
     this.$el.on("click", ".swap-type", this.swapType_.bind(this));
     this.$el.on("click", ".remove", this.removeNode.bind(this));
     this.$el.on("p-dragstart", this.dragStart_.bind(this));
     this.$el.on("p-dragmove", this.dragMove_.bind(this));
     this.$el.on("p-dragend", this.dragEnd_.bind(this));
-    this.$layerGroup = $(this.layerGroup);
     this.$layerGroup.on("p-dragstart", this.connectDragStart_.bind(this));
     this.$layerGroup.on("p-dragmove", this.connectDragMove_.bind(this));
     return this.$layerGroup.on("p-dragend", this.connectDragEnd_.bind(this));
@@ -847,6 +849,10 @@
         scale: 1
       });
     }
+  };
+
+  Node.mouseDownLayer_ = function(e) {
+    return e.preventDefault();
   };
 
   /* ===========================================================================

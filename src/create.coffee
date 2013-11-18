@@ -31,5 +31,8 @@ class Create
 
       node.setup()
 
+      # Auto select input
+      node.querySelector("input").select()
+
 
 module.exports = new Create()

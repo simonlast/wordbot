@@ -244,10 +244,10 @@ p-conversation .log p {
   border-radius: 8px;
   min-height: 34px;
   box-shadow: 0 0 12px rgba(100, 100, 100, 0.2);
-  -webkit-transition: all 200ms ease-in-out;
-  -moz-transition: all 200ms ease-in-out;
-  -o-transition: all 200ms ease-in-out;
-  -ms-transition: all 200ms ease-in-out;
+  -webkit-transition: all 100ms ease-in-out;
+  -moz-transition: all 100ms ease-in-out;
+  -o-transition: all 100ms ease-in-out;
+  -ms-transition: all 100ms ease-in-out;
 }
 p-conversation .log .output {
   background-color: #d8715c;

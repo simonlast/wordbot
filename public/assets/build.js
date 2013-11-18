@@ -476,8 +476,7 @@
       if (data != null) {
         return this.renderData_(data);
       } else {
-        this.dataRendered = true;
-        return this.toggleEditing_();
+        return this.dataRendered = true;
       }
     };
 

@@ -92,7 +92,7 @@ class Persist
       @dataRendered = true
 
       # If there is no data, go into editing mode.
-      @toggleEditing_()
+      # @toggleEditing_()
 
 
 

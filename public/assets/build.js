@@ -581,108 +581,7 @@
 
 }).call(this);
 
-},{}],9:[function(require,module,exports){
-(function() {
-  var ConnectionLayer, html, util;
-
-  util = require("../util.coffee");
-
-  ConnectionLayer = Object.create(HTMLElement.prototype);
-
-  html = "<svg></svg>";
-
-  ConnectionLayer.readyCallback = function() {
-    this.$el = $(this);
-    this.innerHTML = html;
-    this.svg = this.querySelector("svg");
-    return this.users = {};
-  };
-
-  /* ===========================================================================
-  
-    Public
-  
-  ===========================================================================
-  */
-
-
-  ConnectionLayer.registerUser = function(id) {
-    var group;
-    group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    this.svg.appendChild(group);
-    this.users[id] = group;
-    group.classList.add("nodeGroup");
-    return group;
-  };
-
-  ConnectionLayer.addLineEl = function(id, fromEl, toEl) {
-    var fromMiddle, lineGroup, toMiddle;
-    fromMiddle = util.getElMiddle(fromEl);
-    toMiddle = util.getElMiddle(toEl);
-    lineGroup = this.addLine(id, fromMiddle, toMiddle);
-    return lineGroup.info = {
-      from: fromEl,
-      to: toEl
-    };
-  };
-
-  ConnectionLayer.addNib = function(id, x, y, rad) {
-    var circle, group;
-    if (rad == null) {
-      rad = 20;
-    }
-    group = this.users[id];
-    circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circle.setAttribute("cx", x);
-    circle.setAttribute("cy", y);
-    circle.setAttribute("r", rad);
-    circle.classList.add("nib");
-    circle.classList.add("canDragstart");
-    return group.appendChild(circle);
-  };
-
-  ConnectionLayer.addLine = function(id, from, to) {
-    var idGroup, lineGroup, sub;
-    idGroup = this.users[id];
-    lineGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    idGroup.appendChild(lineGroup);
-    lineGroup.classList.add("lineGroup");
-    lineGroup.classList.add("canDragstart");
-    lineGroup.appendChild(this.makeLineSimple(from, to));
-    from = $V(from);
-    to = $V(to);
-    sub = from.subtract(to);
-    sub = sub.rotate(Math.PI / 2, $V([0, 0]));
-    sub = sub.toUnitVector();
-    sub = sub.multiply(12);
-    lineGroup.appendChild(this.makeLineSimple(from.add(sub).elements, to.elements));
-    lineGroup.appendChild(this.makeLineSimple(from.subtract(sub).elements, to.elements));
-    return lineGroup;
-  };
-
-  ConnectionLayer.clear = function(id) {
-    var group;
-    group = this.users[id];
-    return group != null ? group.innerHTML = "" : void 0;
-  };
-
-  ConnectionLayer.makeLineSimple = function(from, to) {
-    var newLine;
-    newLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    newLine.setAttribute("x1", from[0]);
-    newLine.setAttribute("x2", to[0]);
-    newLine.setAttribute("y1", from[1]);
-    newLine.setAttribute("y2", to[1]);
-    return newLine;
-  };
-
-  document.register("p-connection-layer", {
-    prototype: ConnectionLayer
-  });
-
-}).call(this);
-
-},{"../util.coffee":8}],10:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function() {
   var Node, html, util,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -786,11 +685,7 @@
   };
 
   Node.drawConnections = function() {
-    var elBox, oldTransform, other, _i, _len, _ref;
-    oldTransform = this.$el.css("transform");
-    this.$el.css({
-      transform: "none"
-    });
+    var elBox, other, _i, _len, _ref;
     this.connectionLayer.clear(this.nodeId);
     _ref = this.connectedTo;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -798,10 +693,7 @@
       this.connectionLayer.addLineEl(this.nodeId, this, other);
     }
     elBox = util.getElOuterBox(this);
-    this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 25);
-    return this.$el.css({
-      transform: oldTransform
-    });
+    return this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 25);
   };
 
   Node.drawRelatedConnections = function() {
@@ -1024,6 +916,107 @@
 
   document.register("p-conversation", {
     prototype: Conversation
+  });
+
+}).call(this);
+
+},{"../util.coffee":8}],9:[function(require,module,exports){
+(function() {
+  var ConnectionLayer, html, util;
+
+  util = require("../util.coffee");
+
+  ConnectionLayer = Object.create(HTMLElement.prototype);
+
+  html = "<svg></svg>";
+
+  ConnectionLayer.readyCallback = function() {
+    this.$el = $(this);
+    this.innerHTML = html;
+    this.svg = this.querySelector("svg");
+    return this.users = {};
+  };
+
+  /* ===========================================================================
+  
+    Public
+  
+  ===========================================================================
+  */
+
+
+  ConnectionLayer.registerUser = function(id) {
+    var group;
+    group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    this.svg.appendChild(group);
+    this.users[id] = group;
+    group.classList.add("nodeGroup");
+    return group;
+  };
+
+  ConnectionLayer.addLineEl = function(id, fromEl, toEl) {
+    var fromMiddle, lineGroup, toMiddle;
+    fromMiddle = util.getElMiddle(fromEl);
+    toMiddle = util.getElMiddle(toEl);
+    lineGroup = this.addLine(id, fromMiddle, toMiddle);
+    return lineGroup.info = {
+      from: fromEl,
+      to: toEl
+    };
+  };
+
+  ConnectionLayer.addNib = function(id, x, y, rad) {
+    var circle, group;
+    if (rad == null) {
+      rad = 20;
+    }
+    group = this.users[id];
+    circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", rad);
+    circle.classList.add("nib");
+    circle.classList.add("canDragstart");
+    return group.appendChild(circle);
+  };
+
+  ConnectionLayer.addLine = function(id, from, to) {
+    var idGroup, lineGroup, sub;
+    idGroup = this.users[id];
+    lineGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    idGroup.appendChild(lineGroup);
+    lineGroup.classList.add("lineGroup");
+    lineGroup.classList.add("canDragstart");
+    lineGroup.appendChild(this.makeLineSimple(from, to));
+    from = $V(from);
+    to = $V(to);
+    sub = from.subtract(to);
+    sub = sub.rotate(Math.PI / 2, $V([0, 0]));
+    sub = sub.toUnitVector();
+    sub = sub.multiply(12);
+    lineGroup.appendChild(this.makeLineSimple(from.add(sub).elements, to.elements));
+    lineGroup.appendChild(this.makeLineSimple(from.subtract(sub).elements, to.elements));
+    return lineGroup;
+  };
+
+  ConnectionLayer.clear = function(id) {
+    var group;
+    group = this.users[id];
+    return group != null ? group.innerHTML = "" : void 0;
+  };
+
+  ConnectionLayer.makeLineSimple = function(from, to) {
+    var newLine;
+    newLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    newLine.setAttribute("x1", from[0]);
+    newLine.setAttribute("x2", to[0]);
+    newLine.setAttribute("y1", from[1]);
+    newLine.setAttribute("y2", to[1]);
+    return newLine;
+  };
+
+  document.register("p-connection-layer", {
+    prototype: ConnectionLayer
   });
 
 }).call(this);

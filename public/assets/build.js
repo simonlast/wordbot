@@ -190,7 +190,7 @@
       return $(document).on("input", "p-node", this.selectNode_);
     };
 
-    Controller.prototype.toggleEditing_ = function(e) {
+    Controller.prototype.toggleEditing_ = function() {
       document.querySelector(".conversation").classList.toggle("conversation-mode");
       return this.conversation.scrollToBottom();
     };
@@ -557,7 +557,7 @@
   util.getElOuterBox = function(el) {
     var $el, box;
     $el = $(el);
-    box = $el.offset();
+    box = $el.position();
     box.width = $el.outerWidth();
     box.height = $el.outerHeight();
     return box;

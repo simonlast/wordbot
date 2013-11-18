@@ -10,7 +10,7 @@ util.setCursor = (type) ->
 
 util.getElOuterBox = (el) ->
   $el = $(el)
-  box = $el.offset()
+  box = $el.position()
   box.width = $el.outerWidth()
   box.height = $el.outerHeight()
   return box

@@ -18,7 +18,7 @@ class Controller
     $(document).on("input", "p-node", @selectNode_)
 
 
-  toggleEditing_: (e) =>
+  toggleEditing_: =>
     document.querySelector(".conversation").classList.toggle("conversation-mode")
     @conversation.scrollToBottom()
 

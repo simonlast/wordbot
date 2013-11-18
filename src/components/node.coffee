@@ -108,12 +108,19 @@ Node.deselectPotentialNode = ->
 
 
 Node.drawConnections = ->
+  # Get rid of any transformbefore measurement
+  oldTransform = @$el.css("transform")
+  @$el.css({transform: "none"})
+
   @connectionLayer.clear(@nodeId)
   for other in @connectedTo
     @connectionLayer.addLineEl(@nodeId, this, other)
 
   elBox = util.getElOuterBox(this)
   @connectionLayer.addNib(@nodeId, elBox.left + elBox.width/2, elBox.top + elBox.height, 25)
+
+  # Restore transform
+  @$el.css(transform: oldTransform)
 
 
 # Draw this node's connections, as well as all nodes connected to it.

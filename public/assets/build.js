@@ -780,7 +780,11 @@
   };
 
   Node.drawConnections = function() {
-    var elBox, other, _i, _len, _ref;
+    var elBox, oldTransform, other, _i, _len, _ref;
+    oldTransform = this.$el.css("transform");
+    this.$el.css({
+      transform: "none"
+    });
     this.connectionLayer.clear(this.nodeId);
     _ref = this.connectedTo;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -788,7 +792,10 @@
       this.connectionLayer.addLineEl(this.nodeId, this, other);
     }
     elBox = util.getElOuterBox(this);
-    return this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 25);
+    this.connectionLayer.addNib(this.nodeId, elBox.left + elBox.width / 2, elBox.top + elBox.height, 25);
+    return this.$el.css({
+      transform: oldTransform
+    });
   };
 
   Node.drawRelatedConnections = function() {

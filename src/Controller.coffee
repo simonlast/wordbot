@@ -21,6 +21,7 @@ class Controller
   toggleEditing_: =>
     document.querySelector(".conversation").classList.toggle("conversation-mode")
     @conversation.scrollToBottom()
+    @conversation.querySelector(".conversation-input").select()
 
 
   selectNode_: (e) =>

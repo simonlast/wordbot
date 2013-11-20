@@ -36,8 +36,8 @@ Node.initListeners_ = ->
   @$el.on("mousedown", @mouseDown_.bind(this))
   @$layerGroup.on("mousedown", @mouseDownLayer_.bind(this))
 
-  @$el.on("click", ".swap-type", @swapType_.bind(this))
-  @$el.on("click", ".remove", @removeNode.bind(this))
+  @$el.on("mousedown", ".swap-type", @swapType_.bind(this))
+  @$el.on("mousedown", ".remove", @removeNode.bind(this))
 
   @$el.on("p-dragstart", @dragStart_.bind(this))
   @$el.on("p-dragmove", @dragMove_.bind(this))
@@ -174,8 +174,9 @@ Node.mouseDown_ = (e) ->
   if e.target is e.currentTarget
     e.preventDefault()
 
-    # Force scale to be 1 before dragging
-    @$el.css({scale: 1})
+
+  # Force scale to be 1 before dragging
+  @$el.css({scale: 1})
 
 
 Node.mouseDownLayer_ = (e) ->

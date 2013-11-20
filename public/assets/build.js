@@ -192,7 +192,8 @@
 
     Controller.prototype.toggleEditing_ = function() {
       document.querySelector(".conversation").classList.toggle("conversation-mode");
-      return this.conversation.scrollToBottom();
+      this.conversation.scrollToBottom();
+      return this.conversation.querySelector(".conversation-input").select();
     };
 
     Controller.prototype.selectNode_ = function(e) {
@@ -715,8 +716,8 @@
     this.$layerGroup = $(this.layerGroup);
     this.$el.on("mousedown", this.mouseDown_.bind(this));
     this.$layerGroup.on("mousedown", this.mouseDownLayer_.bind(this));
-    this.$el.on("click", ".swap-type", this.swapType_.bind(this));
-    this.$el.on("click", ".remove", this.removeNode.bind(this));
+    this.$el.on("mousedown", ".swap-type", this.swapType_.bind(this));
+    this.$el.on("mousedown", ".remove", this.removeNode.bind(this));
     this.$el.on("p-dragstart", this.dragStart_.bind(this));
     this.$el.on("p-dragmove", this.dragMove_.bind(this));
     this.$el.on("p-dragend", this.dragEnd_.bind(this));
@@ -867,10 +868,10 @@
   Node.mouseDown_ = function(e) {
     if (e.target === e.currentTarget) {
       e.preventDefault();
-      return this.$el.css({
-        scale: 1
-      });
     }
+    return this.$el.css({
+      scale: 1
+    });
   };
 
   Node.mouseDownLayer_ = function(e) {

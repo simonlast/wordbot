@@ -87,7 +87,6 @@ Node.serialize = ->
       left: box.left
       top: box.top
     }
-    active: @classList.contains("active")
   }
 
 

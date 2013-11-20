@@ -764,8 +764,7 @@
       position: {
         left: box.left,
         top: box.top
-      },
-      active: this.classList.contains("active")
+      }
     };
   };
 

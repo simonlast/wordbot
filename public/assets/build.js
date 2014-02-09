@@ -177,6 +177,7 @@
       this.textTyped_ = __bind(this.textTyped_, this);
       this.selectNode_ = __bind(this.selectNode_, this);
       this.toggleEditing_ = __bind(this.toggleEditing_, this);
+      this.lastReset_ = 0;
       this.nodeContainer = document.querySelector(".node-container");
       this.conversation = document.querySelector("p-conversation");
       this.initListeners_();
@@ -208,7 +209,6 @@
       tokens = this.getTokens_(value);
       activeNode = this.getActiveNode_();
       consumedNodes = this.getConsumedNodes_([activeNode], tokens);
-      console.log(consumedNodes);
       return this.setPotentialNodes_(consumedNodes);
     };
 
@@ -329,19 +329,25 @@
     };
 
     Controller.prototype.setPotentialNodes_ = function(nodes) {
-      var index, nextNode, node, potentialActive, _i, _j, _len, _len1, _results;
+      var currReset, node, potentialActive, _i, _len,
+        _this = this;
+      currReset = new Date().getTime();
+      this.lastReset_ = currReset;
       potentialActive = this.nodeContainer.querySelectorAll(".potentialActive");
       for (_i = 0, _len = potentialActive.length; _i < _len; _i++) {
         node = potentialActive[_i];
         node.deselectPotentialNode();
       }
-      _results = [];
-      for (index = _j = 0, _len1 = nodes.length; _j < _len1; index = ++_j) {
-        node = nodes[index];
+      return _.each(nodes, function(node, index) {
+        var nextNode, selectPotentialNode;
         nextNode = nodes[index + 1];
-        _results.push(node.selectPotentialNode(nextNode));
-      }
-      return _results;
+        selectPotentialNode = function() {
+          if (_this.lastReset_ === currReset) {
+            return node.selectPotentialNode(nextNode);
+          }
+        };
+        return setTimeout(selectPotentialNode, index * 200);
+      });
     };
 
     Controller.prototype.setActiveNode_ = function(node, appendToLog) {
@@ -372,17 +378,7 @@
 
 }).call(this);
 
-},{"./util.coffee":8}],3:[function(require,module,exports){
-(function() {
-  require("./ConnectionLayer.coffee");
-
-  require("./node.coffee");
-
-  require("./Conversation.coffee");
-
-}).call(this);
-
-},{"./ConnectionLayer.coffee":9,"./Conversation.coffee":11,"./node.coffee":10}],7:[function(require,module,exports){
+},{"./util.coffee":8}],7:[function(require,module,exports){
 (function() {
   var Controller, Persist, db, observerOpts, persistWait, urlRegex,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -546,7 +542,17 @@
 
 }).call(this);
 
-},{"./Controller.coffee":6,"./db.coffee":2}],8:[function(require,module,exports){
+},{"./Controller.coffee":6,"./db.coffee":2}],3:[function(require,module,exports){
+(function() {
+  require("./ConnectionLayer.coffee");
+
+  require("./node.coffee");
+
+  require("./Conversation.coffee");
+
+}).call(this);
+
+},{"./ConnectionLayer.coffee":9,"./Conversation.coffee":11,"./node.coffee":10}],8:[function(require,module,exports){
 (function() {
   var util;
 

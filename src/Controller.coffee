@@ -4,6 +4,8 @@ util = require("./util.coffee")
 class Controller
 
   constructor: ->
+    @lastReset_ = 0
+
     @nodeContainer = document.querySelector(".node-container")
     @conversation = document.querySelector("p-conversation")
     @initListeners_()
@@ -36,7 +38,6 @@ class Controller
     activeNode = @getActiveNode_()
 
     consumedNodes = @getConsumedNodes_([activeNode], tokens)
-    console.log consumedNodes
 
     @setPotentialNodes_(consumedNodes)
 
@@ -153,13 +154,21 @@ class Controller
 
 
   setPotentialNodes_: (nodes) ->
+    currReset = new Date().getTime()
+    @lastReset_ = currReset
     potentialActive = @nodeContainer.querySelectorAll(".potentialActive")
+
     for node in potentialActive
       node.deselectPotentialNode()
 
-    for node, index in nodes
+    _.each nodes, (node, index) =>
       nextNode = nodes[index+1]
-      node.selectPotentialNode(nextNode)
+
+      selectPotentialNode = =>
+        if @lastReset_ is currReset
+          node.selectPotentialNode(nextNode)
+
+      setTimeout(selectPotentialNode, index * 200)
 
 
 

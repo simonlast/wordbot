@@ -372,7 +372,17 @@
 
 }).call(this);
 
-},{"./util.coffee":8}],7:[function(require,module,exports){
+},{"./util.coffee":8}],3:[function(require,module,exports){
+(function() {
+  require("./ConnectionLayer.coffee");
+
+  require("./node.coffee");
+
+  require("./Conversation.coffee");
+
+}).call(this);
+
+},{"./ConnectionLayer.coffee":9,"./Conversation.coffee":11,"./node.coffee":10}],7:[function(require,module,exports){
 (function() {
   var Controller, Persist, db, observerOpts, persistWait, urlRegex,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -536,17 +546,7 @@
 
 }).call(this);
 
-},{"./Controller.coffee":6,"./db.coffee":2}],3:[function(require,module,exports){
-(function() {
-  require("./ConnectionLayer.coffee");
-
-  require("./node.coffee");
-
-  require("./Conversation.coffee");
-
-}).call(this);
-
-},{"./ConnectionLayer.coffee":9,"./Conversation.coffee":11,"./node.coffee":10}],8:[function(require,module,exports){
+},{"./Controller.coffee":6,"./db.coffee":2}],8:[function(require,module,exports){
 (function() {
   var util;
 

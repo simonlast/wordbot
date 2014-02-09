@@ -65,7 +65,7 @@ class Controller
 
     outputs = @getConnectedOutputs_(lastNode)
 
-    # If there are any outputs, consume the first and recur
+    # If there are any outputs, consume them first and recur
     if outputs.length > 0
       nodes = _.clone(nodes)
       nodes.push(outputs[0])
